@@ -19,7 +19,6 @@ ndm.Map.Write("mapfromdemo.mapa");
 
 Можно создать свою карту, или изменить существующую:
 
-![](http://i.imgur.com/eAna7FE.png)
 ```cs
 var nmap = new NFKMap();
 var map = nfkmap.NewMap(15, 8);
@@ -46,6 +45,7 @@ map.Objects = new TMapObj[] { obj }; // добавить портал в мас�
 
 nmap.Write("test.mapa");
 ```
+![](http://i.imgur.com/eAna7FE.png)
 
 Можно открыть отдельный файл карты:
 ```cs

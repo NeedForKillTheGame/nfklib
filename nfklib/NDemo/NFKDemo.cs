@@ -18,14 +18,17 @@ namespace nfklib.NDemo
         const string DemoHeader = "NFKDEMO";
 
         public bool Error = false;
-        private DemoInfo demo;
+        private DemoItem demo;
+
+        public NFKMap Map;
 
         public NFKDemo()
         {
-            demo = new DemoInfo();
+            demo = new DemoItem();
+            Map = new NFKMap();
         }
 
-        public DemoInfo Read(string fileName)
+        public DemoItem Read(string fileName)
         {
             using (var fs = new FileStream(fileName, FileMode.Open))
             {
@@ -48,7 +51,7 @@ namespace nfklib.NDemo
 #endif
                     using (var mbr = new BinaryReader(new MemoryStream(data)))
                     {
-                        demo.Map = new NFKMap().Read(mbr);
+                        demo.Map = Map.Read(mbr);
 
                         // rewind
                         mbr.BaseStream.Seek(-Marshal.SizeOf(typeof(TMapEntry)), SeekOrigin.Current);
@@ -76,7 +79,7 @@ namespace nfklib.NDemo
         /// </summary>
         /// <param name="br"></param>
         /// <returns></returns>
-        public DemoInfo Read(BinaryReader br)
+        public DemoItem Read(BinaryReader br)
         {
 
             bool error = false;

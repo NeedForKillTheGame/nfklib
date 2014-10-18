@@ -10,21 +10,45 @@ using System.Runtime.InteropServices;
 
 namespace nfklib.NMap
 {
-    class NFKMap
+    public class NFKMap
     {
         public const int BrickWidth = 32;
         public const int BrickHeight = 16;
         const string MapHeader = "NMAP"; // normal map file
         const string MapInDemoHeader = "NDEM"; // map nested in demo file
 
-        private MapInfo map;
+        public MapItem map;
 
         public NFKMap()
         {
-            map = new MapInfo();
+            map = new MapItem();
         }
 
-        public MapInfo Read(string fileName)
+        public MapItem NewMap(byte width = 20, byte height = 30)
+        {
+            map.Header.ID = MapHeader.ToCharArray();
+            map.Header.Version = 3;
+
+            map.Header.MapSizeX = width;
+            map.Header.MapSizeY = height;
+            map.Header.MapName = "test map";
+            map.Header.Author = "unnamed";
+
+            // allocate bricks array
+            map.Bricks = new byte[width][];
+            for (int y = 0; y < map.Header.MapSizeY; y++)
+            {
+                for (int x = 0; x < map.Header.MapSizeX; x++)
+                {
+                    if (map.Bricks[x] == null)
+                        map.Bricks[x] = new byte[map.Header.MapSizeY];
+                }
+            }
+
+            return map;
+        }
+
+        public MapItem Read(string fileName)
         {
             using (var fs = new FileStream(fileName, FileMode.Open))
             {
@@ -36,7 +60,7 @@ namespace nfklib.NMap
             return map;
         }
 
-        public MapInfo Read(BinaryReader br)
+        public MapItem Read(BinaryReader br)
         {
             // map header
             map.Header = br.BaseStream.ReadStruct<THeader>();
@@ -74,13 +98,12 @@ namespace nfklib.NMap
                         ? palette_data
                         : Helper.BZDecompress(palette_data);
 
-#if DEBUG
                     map.Palette = new Bitmap(new MemoryStream(palette_bin));
-                    map.Palette.Save("pal.bmp", ImageFormat.Bmp);
-#endif
                     if (entry.Reserved6 == 1)
                     {
-                        // TODO: set transparent color
+                        // set transparent color
+                        var color = Color.FromArgb(entry.Reserved5);
+                        map.Palette.MakeTransparent(color);
                     }
                 }
                 // locations
@@ -102,6 +125,53 @@ namespace nfklib.NMap
             }
             return map;
 
+        }
+
+        public void Write(string fileName)
+        {
+            using (var fs = new FileStream(fileName, FileMode.Create))
+            {
+                using (var bw = new BinaryWriter(fs, Encoding.ASCII))
+                {
+                    Write(bw);
+                }
+            }
+        }
+
+        public void Write(BinaryWriter bw)
+        {
+            // map header
+            bw.Write(StreamExtensions.ToByteArray<THeader>(map.Header));
+
+            // write bricks 
+            for (int y = 0; y < map.Header.MapSizeY; y++)
+            {
+                for (int x = 0; x < map.Header.MapSizeX; x++)
+                {
+                    bw.Write(map.Bricks[x][y]);
+                }
+            }
+            // write objects
+            for (int i = 0; i < map.Header.numobj; i++)
+                bw.Write(StreamExtensions.ToByteArray<TMapObj>(map.Objects[i]));
+
+            if (map.Palette != null)
+            {
+                // entry
+                bw.Write(StreamExtensions.ToByteArray<TMapEntry>(map.PaletteEntry));
+                // bitmap bytes
+                bw.Write(map.Palette.ToByteArray(ImageFormat.Bmp));
+            }
+            if (map.Locations != null)
+            {
+                // entry
+                bw.Write(StreamExtensions.ToByteArray<TMapEntry>(map.LocationEntry));
+                // locations array
+                for (var i = 0; i < map.Locations.Length; i++)
+                {
+                    bw.Write(StreamExtensions.ToByteArray<TLocationText>(map.Locations[i]));
+                }
+            }
         }
     }
 }

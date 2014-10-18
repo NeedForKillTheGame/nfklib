@@ -140,6 +140,11 @@ namespace nfklib.NMap
 
         public void Write(BinaryWriter bw)
         {
+            map.Header.MapName = Helper.SetDelphiString(map.Header.MapName, 71);
+            map.Header.Author = Helper.SetDelphiString(map.Header.Author, 71);
+            if (map.Objects != null)
+                map.Header.numobj = (byte)map.Objects.Length;
+
             // map header
             bw.Write(StreamExtensions.ToByteArray<THeader>(map.Header));
 
@@ -152,15 +157,22 @@ namespace nfklib.NMap
                 }
             }
             // write objects
-            for (int i = 0; i < map.Header.numobj; i++)
-                bw.Write(StreamExtensions.ToByteArray<TMapObj>(map.Objects[i]));
+            if (map.Objects != null)
+            {
+                for (int i = 0; i < map.Header.numobj; i++)
+                {
+                    map.Objects[i].unknown0 = map.Objects[i].unknown1 = 0x03;
+                    bw.Write(StreamExtensions.ToByteArray<TMapObj>(map.Objects[i]));
+                }
+            }
 
             if (map.Palette != null)
             {
                 // entry
                 bw.Write(StreamExtensions.ToByteArray<TMapEntry>(map.PaletteEntry));
                 // bitmap bytes
-                bw.Write(map.Palette.ToByteArray(ImageFormat.Bmp));
+                var palettebin = map.Palette.ToByteArray(ImageFormat.Bmp);
+                bw.Write(Helper.BZCompress(palettebin));
             }
             if (map.Locations != null)
             {
@@ -169,6 +181,7 @@ namespace nfklib.NMap
                 // locations array
                 for (var i = 0; i < map.Locations.Length; i++)
                 {
+                    map.Locations[i].text = Helper.SetDelphiString(map.Locations[i].text, 65);
                     bw.Write(StreamExtensions.ToByteArray<TLocationText>(map.Locations[i]));
                 }
             }

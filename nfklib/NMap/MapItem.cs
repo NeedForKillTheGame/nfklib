@@ -6,7 +6,7 @@ using System.Text;
 
 namespace nfklib.NMap
 {
-    public class MapInfo
+    public class MapItem
     {
         public THeader Header = new THeader();
         public TMapObj Map = new TMapObj();

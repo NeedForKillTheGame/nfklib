@@ -43,15 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NDemo\DemoInfo.cs" />
+    <Compile Include="NDemo\DemoItem.cs" />
     <Compile Include="NDemo\DemoUnit.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Helper.cs" />
     <Compile Include="NDemo\NFKDemo.cs" />
-    <Compile Include="NMap\MapInfo.cs" />
+    <Compile Include="NMap\MapItem.cs" />
     <Compile Include="NMap\MapUnit.cs" />
     <Compile Include="NMap\NFKMap.cs" />
+    <Compile Include="NMap\SimpleObject.cs" />
+    <Compile Include="NMap\SpecialObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions.cs" />
   </ItemGroup>

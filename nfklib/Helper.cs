@@ -47,10 +47,19 @@ namespace nfklib
                 str = str.Substring(1, len);
             return str;
         }
+        public static string SetDelphiString(string str, int maxSize)
+        {
+            var original = str;
 
+            byte[] bytes = new byte[maxSize];
+            Array.Copy(new byte[] {  (byte)str.Length }, bytes, 1);
+            Array.Copy(Encoding.Default.GetBytes(str), 0, bytes, 1, str.Length);
+
+            return Encoding.Default.GetString(bytes);
+        }
 
         /// <summary>
-        /// Decompress BZip data
+        /// Decompress BZip2 data
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -75,6 +84,23 @@ namespace nfklib
                     }
                     while (count > 0);
                     return memory.ToArray();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Compress data using BZip2
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static byte[] BZCompress(byte[] data)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (BZip2Stream zip = new BZip2Stream(stream, SharpCompress.Compressor.CompressionMode.Compress))
+                {
+                    zip.Write(data, 0, data.Length);
+                    return stream.ToArray();
                 }
             }
         }

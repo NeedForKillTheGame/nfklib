@@ -12,13 +12,14 @@ NFK Helper Library
 var fileName = "demo.ndm";
 var ndm = new nfklib.NDemo.NFKDemo();
 var demo = ndm.Read(fileName);
-// палитра
-demo.Map.Palette.Save("palette.png", ImageFormat.Png);
-// карта
+
+// сохранить файл карты
 ndm.Map.Write("mapfromdemo.mapa");
 ```
 
 Можно создать свою карту, или изменить существующую:
+
+![](http://i.imgur.com/eAna7FE.png)
 ```cs
 var nmap = new NFKMap();
 var map = nfkmap.NewMap(15, 8);
@@ -45,4 +46,16 @@ map.Objects = new TMapObj[] { obj }; // добавить портал в мас�
 
 nmap.Write("test.mapa");
 ```
-![](http://i.imgur.com/eAna7FE.png)
+
+Можно открыть отдельный файл карты:
+```cs
+var fileName = "map.mapa";
+var nmap = new NFKMap();
+var map = nmap.Read();
+
+// извлечь картинку палитры
+demo.Map.Palette.Save("palette.png", ImageFormat.Png);
+```
+
+
+[Разбор формата NFKDEMO](https://github.com/HarpyWar/nfklib/wiki/Разбор-формата-NFKDEMO)

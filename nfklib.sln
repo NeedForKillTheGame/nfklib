@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nfklib", "nfklib\nfklib.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{E0976C61-249A-4E72-A6ED-E7517B89B00E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demowebapi", "demowebapi\demowebapi.csproj", "{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{E0976C61-249A-4E72-A6ED-E7517B89B00E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0976C61-249A-4E72-A6ED-E7517B89B00E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0976C61-249A-4E72-A6ED-E7517B89B00E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

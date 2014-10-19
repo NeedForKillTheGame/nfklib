@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<configuration>
+  <ServiceName>NFKWebApi</ServiceName>
+  <DisplayName>NFK Web API</DisplayName>
+  <Description>Web API for Demos</Description>
+  <LogFile>event.log</LogFile>
+  <!-- web api listening address and port -->
+  <EndPoint>servers.needforkill.com:8080</EndPoint>
+  <!-- max demo file (bytes) -->
+  <MaxUploadSize>10485760</MaxUploadSize>
+  <!-- it can be opened from http://{endpoint}/demo -->
+  <IndexFile>index.html</IndexFile>
+</configuration>

@@ -65,5 +65,6 @@ demowebapi
 
 Работает по адресу http://servers.needforkill.com:8080
 
-`````````````````
+------------------------------
+
 [Разбор формата NFKDEMO](https://github.com/HarpyWar/nfklib/wiki/Разбор-формата-NFKDEMO)

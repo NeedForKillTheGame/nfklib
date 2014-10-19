@@ -3,7 +3,7 @@ NFK Helper Library
 
 Извлекает информацию из демки и из карты игры [Need For Kill](http://needforkill.ru)
 
-В [тестовой программе](https://github.com/HarpyWar/nfklib/blob/master/test/Program.cs) показан пример вывода статистики:
+В [тестовой программе](https://github.com/HarpyWar/nfklib/blob/master/test/Program.cs) показан пример вывода статистики игроков:
 
 ![](http://i.imgur.com/Y4zmfdU.png)
 
@@ -47,15 +47,23 @@ nmap.Write("test.mapa");
 ```
 ![](http://i.imgur.com/eAna7FE.png)
 
-Можно открыть отдельный файл карты:
+Можно получить информацию из отдельной карты:
 ```cs
 var fileName = "map.mapa";
 var nmap = new NFKMap();
 var map = nmap.Read();
 
 // извлечь картинку палитры
-demo.Map.Palette.Save("palette.png", ImageFormat.Png);
+map.Palette.Save("palette.png", ImageFormat.Png);
 ```
 
+demowebapi
+---
+Дополнительная программа-пример, предоставляет REST WebAPI с единственным методом для загрузки демок, который возвращает статистику игроков в формате JSON.
 
+Можно установить как службу Windows с параметром командной строки `demowebapi.exe /install`, или удалить через `demowebapi.exe /uninstall`.
+
+Работает по адресу http://servers.needforkill.com:8080
+
+`````````````````
 [Разбор формата NFKDEMO](https://github.com/HarpyWar/nfklib/wiki/Разбор-формата-NFKDEMO)

@@ -32,40 +32,45 @@ namespace nfklib.NDemo
         {
             using (var fs = new FileStream(fileName, FileMode.Open))
             {
-                using (var br = new BinaryReader(fs, Encoding.ASCII))
+                return Read(fs);
+            }
+        }
+
+        public DemoItem Read(Stream stream)
+        {
+            using (var br = new BinaryReader(stream, Encoding.ASCII))
+            {
+                // check if header is bad
+                var header = br.ReadBytes(DemoHeader.Length);
+                if (Encoding.Default.GetString(header) != DemoHeader)
+                    return null;
+
+                // separator 0x2D
+                br.ReadByte();
+                // gzip compressed data
+                var gzdata = br.ReadBytes((int)stream.Length - 8);
+
+                var data = Helper.BZDecompress(gzdata);
+
+#if DEBUG
+                File.WriteAllBytes("rawdemoandmap.ndm", data);
+#endif
+                using (var ms = new MemoryStream(data))
                 {
-                    // check if header is bad
-                    var header = br.ReadBytes(DemoHeader.Length);
-                    if (Encoding.Default.GetString(header) != DemoHeader)
-                        return null;
+                    demo.Map = Map.Read(ms);
 
-                    // separator 0x2D
-                    br.ReadByte();
-                    // gzip compressed data
-                    var gzdata = br.ReadBytes((int)fs.Length - 8);
-
-                    var data = Helper.BZDecompress(gzdata);
+                    // rewind
+                    ms.Seek(-Marshal.SizeOf(typeof(TMapEntry)), SeekOrigin.Current);
 
 #if DEBUG
-                    File.WriteAllBytes("rawdemoandmap.ndm", data);
+                    var pos = mbr.BaseStream.Position; // remember
+                    int datasize = (int)(mbr.BaseStream.Length - mbr.BaseStream.Position) - 1;
+                    byte[] data2 = new byte[datasize];
+                    mbr.BaseStream.Read(data2, 0, datasize);
+                    File.WriteAllBytes("rawdemo.ndm", data2);
+                    mbr.BaseStream.Seek(pos, SeekOrigin.Begin); // restore
 #endif
-                    using (var mbr = new BinaryReader(new MemoryStream(data)))
-                    {
-                        demo.Map = Map.Read(mbr);
-
-                        // rewind
-                        mbr.BaseStream.Seek(-Marshal.SizeOf(typeof(TMapEntry)), SeekOrigin.Current);
-
-#if DEBUG
-                        var pos = mbr.BaseStream.Position; // remember
-                        int datasize = (int)(mbr.BaseStream.Length - mbr.BaseStream.Position) - 1;
-                        byte[] data2 = new byte[datasize];
-                        mbr.BaseStream.Read(data2, 0, datasize);
-                        File.WriteAllBytes("rawdemo.ndm", data2);
-                        mbr.BaseStream.Seek(pos, SeekOrigin.Begin); // restore
-#endif
-                        demo = Read(mbr);
-                    }
+                    demo = Read(ms);
                 }
             }
             return demo;

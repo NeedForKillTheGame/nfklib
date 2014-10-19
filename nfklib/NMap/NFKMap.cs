@@ -52,75 +52,74 @@ namespace nfklib.NMap
         {
             using (var fs = new FileStream(fileName, FileMode.Open))
             {
-                using (var br = new BinaryReader(fs, Encoding.ASCII))
-                {
-                    map = Read(br);
-                }
+                return Read(fs);
             }
-            return map;
         }
 
-        public MapItem Read(BinaryReader br)
+        public MapItem Read(Stream stream)
         {
-            // map header
-            map.Header = br.BaseStream.ReadStruct<THeader>();
-
-            map.Bricks = new byte[map.Header.MapSizeX][];
-            // read bricks (start at pos 154)
-            for (int y = 0; y < map.Header.MapSizeY; y++)
+            using (var br = new BinaryReader(stream, Encoding.ASCII))
             {
-                for (int x = 0; x < map.Header.MapSizeX; x++)
+                // map header
+                map.Header = br.BaseStream.ReadStruct<THeader>();
+
+                map.Bricks = new byte[map.Header.MapSizeX][];
+                // read bricks (start at pos 154)
+                for (int y = 0; y < map.Header.MapSizeY; y++)
                 {
-                    if (map.Bricks[x] == null)
-                        map.Bricks[x] = new byte[map.Header.MapSizeY];
-                    map.Bricks[x][y] = br.ReadByte();
-                }
-            }
-
-            map.Objects = new TMapObj[map.Header.numobj];
-            // read objects
-            for (int i = 0; i < map.Header.numobj; i++)
-                map.Objects[i] = br.BaseStream.ReadStruct<TMapObj>();
-
-            // read pal and loc blocks
-            while (br.BaseStream.Length > br.BaseStream.Position)
-            {
-                var entry = br.BaseStream.ReadStruct<TMapEntry>();
-
-                // palette
-                if (new string(entry.EntryType).EndsWith("pal"))
-                {
-                    map.PaletteEntry = entry;
-
-                    var palette_data = br.ReadBytes(entry.DataSize);
-                    // map nested in demo is not compressed
-                    var palette_bin = (new string(map.Header.ID) == MapInDemoHeader)
-                        ? palette_data
-                        : Helper.BZDecompress(palette_data);
-
-                    map.Palette = new Bitmap(new MemoryStream(palette_bin));
-                    if (entry.Reserved6 == 1)
+                    for (int x = 0; x < map.Header.MapSizeX; x++)
                     {
-                        // set transparent color
-                        var color = Color.FromArgb(entry.Reserved5);
-                        map.Palette.MakeTransparent(color);
+                        if (map.Bricks[x] == null)
+                            map.Bricks[x] = new byte[map.Header.MapSizeY];
+                        map.Bricks[x][y] = br.ReadByte();
                     }
                 }
-                // locations
-                else if (new string(entry.EntryType).EndsWith("loc"))
+
+                map.Objects = new TMapObj[map.Header.numobj];
+                // read objects
+                for (int i = 0; i < map.Header.numobj; i++)
+                    map.Objects[i] = br.BaseStream.ReadStruct<TMapObj>();
+
+                // read pal and loc blocks
+                while (br.BaseStream.Length > br.BaseStream.Position)
                 {
-                    var loc_count = entry.DataSize / Marshal.SizeOf(typeof(TLocationText));
-                    map.Locations = new TLocationText[loc_count];
-                    map.LocationEntry = entry;
-                    for (var i = 0; i < loc_count; i++)
+                    var entry = br.BaseStream.ReadStruct<TMapEntry>();
+
+                    // palette
+                    if (new string(entry.EntryType).EndsWith("pal"))
                     {
-                        map.Locations[i] = br.BaseStream.ReadStruct<TLocationText>();
+                        map.PaletteEntry = entry;
+
+                        var palette_data = br.ReadBytes(entry.DataSize);
+                        // map nested in demo is not compressed
+                        var palette_bin = (new string(map.Header.ID) == MapInDemoHeader)
+                            ? palette_data
+                            : Helper.BZDecompress(palette_data);
+
+                        map.Palette = new Bitmap(new MemoryStream(palette_bin));
+                        if (entry.Reserved6 == 1)
+                        {
+                            // set transparent color
+                            var color = Color.FromArgb(entry.Reserved5);
+                            map.Palette.MakeTransparent(color);
+                        }
                     }
-                }
-                // end of map
-                else
-                {
-                    break;
+                    // locations
+                    else if (new string(entry.EntryType).EndsWith("loc"))
+                    {
+                        var loc_count = entry.DataSize / Marshal.SizeOf(typeof(TLocationText));
+                        map.Locations = new TLocationText[loc_count];
+                        map.LocationEntry = entry;
+                        for (var i = 0; i < loc_count; i++)
+                        {
+                            map.Locations[i] = br.BaseStream.ReadStruct<TLocationText>();
+                        }
+                    }
+                    // end of map
+                    else
+                    {
+                        break;
+                    }
                 }
             }
             return map;

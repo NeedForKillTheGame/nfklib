@@ -60,70 +60,79 @@ namespace nfklib.NMap
         {
             using (var br = new BinaryReader(stream, Encoding.ASCII))
             {
-                // map header
-                map.Header = br.BaseStream.ReadStruct<THeader>();
+                return Read(br);
+            }
+        }
 
-                map.Bricks = new byte[map.Header.MapSizeX][];
-                // read bricks (start at pos 154)
-                for (int y = 0; y < map.Header.MapSizeY; y++)
+        public MapItem Read(BinaryReader br)
+        {
+            // map header
+            map.Header = br.BaseStream.ReadStruct<THeader>();
+
+            map.Bricks = new byte[map.Header.MapSizeX][];
+            // read bricks (start at pos 154)
+            for (int y = 0; y < map.Header.MapSizeY; y++)
+            {
+                for (int x = 0; x < map.Header.MapSizeX; x++)
                 {
-                    for (int x = 0; x < map.Header.MapSizeX; x++)
-                    {
-                        if (map.Bricks[x] == null)
-                            map.Bricks[x] = new byte[map.Header.MapSizeY];
-                        map.Bricks[x][y] = br.ReadByte();
-                    }
-                }
-
-                map.Objects = new TMapObj[map.Header.numobj];
-                // read objects
-                for (int i = 0; i < map.Header.numobj; i++)
-                    map.Objects[i] = br.BaseStream.ReadStruct<TMapObj>();
-
-                // read pal and loc blocks
-                while (br.BaseStream.Length > br.BaseStream.Position)
-                {
-                    var entry = br.BaseStream.ReadStruct<TMapEntry>();
-
-                    // palette
-                    if (new string(entry.EntryType).EndsWith("pal"))
-                    {
-                        map.PaletteEntry = entry;
-
-                        var palette_data = br.ReadBytes(entry.DataSize);
-                        // map nested in demo is not compressed
-                        var palette_bin = (new string(map.Header.ID) == MapInDemoHeader)
-                            ? palette_data
-                            : Helper.BZDecompress(palette_data);
-
-                        map.Palette = new Bitmap(new MemoryStream(palette_bin));
-                        if (entry.Reserved6 == 1)
-                        {
-                            // set transparent color
-                            var color = Color.FromArgb(entry.Reserved5);
-                            map.Palette.MakeTransparent(color);
-                        }
-                    }
-                    // locations
-                    else if (new string(entry.EntryType).EndsWith("loc"))
-                    {
-                        var loc_count = entry.DataSize / Marshal.SizeOf(typeof(TLocationText));
-                        map.Locations = new TLocationText[loc_count];
-                        map.LocationEntry = entry;
-                        for (var i = 0; i < loc_count; i++)
-                        {
-                            map.Locations[i] = br.BaseStream.ReadStruct<TLocationText>();
-                        }
-                    }
-                    // end of map
-                    else
-                    {
-                        break;
-                    }
+                    if (map.Bricks[x] == null)
+                        map.Bricks[x] = new byte[map.Header.MapSizeY];
+                    map.Bricks[x][y] = br.ReadByte();
                 }
             }
-            return map;
 
+            map.Objects = new TMapObj[map.Header.numobj];
+            // read objects
+            for (int i = 0; i < map.Header.numobj; i++)
+                map.Objects[i] = br.BaseStream.ReadStruct<TMapObj>();
+
+            // read pal and loc blocks
+            while (br.BaseStream.Length > br.BaseStream.Position)
+            {
+                var entry = br.BaseStream.ReadStruct<TMapEntry>();
+
+                // palette
+                if (new string(entry.EntryType).EndsWith("pal"))
+                {
+                    map.PaletteEntry = entry;
+
+                    var palette_data = br.ReadBytes(entry.DataSize);
+                    // map nested in demo is not compressed
+                    var palette_bin = (new string(map.Header.ID) == MapInDemoHeader)
+                        ? palette_data
+                        : Helper.BZDecompress(palette_data);
+
+                    fixBitmapBin(ref palette_data);
+
+                    map.Palette = new Bitmap(new MemoryStream(palette_bin));
+
+                    if (entry.Reserved6 == 1)
+                    {
+                        // set transparent color
+                        var color = Color.FromArgb(entry.Reserved5);
+                        map.Palette.MakeTransparent(color);
+                    }
+                }
+                // locations
+                else if (new string(entry.EntryType).EndsWith("loc"))
+                {
+                    var loc_count = entry.DataSize / Marshal.SizeOf(typeof(TLocationText));
+                    map.Locations = new TLocationText[loc_count];
+                    map.LocationEntry = entry;
+                    for (var i = 0; i < loc_count; i++)
+                    {
+                        map.Locations[i] = br.BaseStream.ReadStruct<TLocationText>();
+                    }
+                }
+                // end of map
+                else
+                {
+                    // restore position to correctly read demo
+                    br.BaseStream.Seek(-(Marshal.SizeOf(typeof(TMapEntry))), SeekOrigin.Current);
+                    break;
+                }
+            } 
+            return map;
         }
 
         public void Write(string fileName)
@@ -182,6 +191,36 @@ namespace nfklib.NMap
                 {
                     map.Locations[i].text = Helper.SetDelphiString(map.Locations[i].text, 65);
                     bw.Write(StreamExtensions.ToByteArray<TLocationText>(map.Locations[i]));
+                }
+            }
+        }
+
+        /// <summary>
+        /// https://github.com/HarpyWar/nfkmap-viewer/wiki/BMP-картинка-палитры
+        /// </summary>
+        /// <param name="data"></param>
+        private void fixBitmapBin(ref byte[] data)
+        {
+            int dataSize = data.Length;
+            int bitmapDataSize;
+
+            using (var ms = new MemoryStream(data))
+            {
+                using (var br = new BinaryReader(ms))
+                {
+                    // read bitmap data length
+                    ms.Seek(0x22, SeekOrigin.Begin);
+                    bitmapDataSize = br.ReadInt32();
+
+                    using (var bw = new BinaryWriter(ms))
+                    {
+                        // write whole data size
+                        bw.Seek(0x02, SeekOrigin.Begin);
+                        bw.Write(dataSize);
+                        // write fixed data offset
+                        bw.Seek(0x0A, SeekOrigin.Begin);
+                        bw.Write(dataSize - bitmapDataSize);
+                    }
                 }
             }
         }

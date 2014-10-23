@@ -38,6 +38,7 @@ namespace nfklib.NDemo
 
         public DemoItem Read(Stream stream)
         {
+            byte[] data;
             using (var br = new BinaryReader(stream, Encoding.ASCII))
             {
                 // check if header is bad
@@ -50,27 +51,25 @@ namespace nfklib.NDemo
                 // gzip compressed data
                 var gzdata = br.ReadBytes((int)stream.Length - 8);
 
-                var data = Helper.BZDecompress(gzdata);
-
+                data = Helper.BZDecompress(gzdata);
+            }
 #if DEBUG
-                File.WriteAllBytes("rawdemoandmap.ndm", data);
+            File.WriteAllBytes("rawdemoandmap.ndm", data);
 #endif
-                using (var ms = new MemoryStream(data))
+            using (var ms = new MemoryStream(data))
+            {
+                using (var mbr = new BinaryReader(ms))
                 {
-                    demo.Map = Map.Read(ms);
-
-                    // rewind
-                    ms.Seek(-Marshal.SizeOf(typeof(TMapEntry)), SeekOrigin.Current);
-
+                    demo.Map = Map.Read(mbr);
 #if DEBUG
-                    var pos = mbr.BaseStream.Position; // remember
-                    int datasize = (int)(mbr.BaseStream.Length - mbr.BaseStream.Position) - 1;
+                    var pos = ms.Position; // remember
+                    int datasize = (int)(ms.Length - ms.Position) - 1;
                     byte[] data2 = new byte[datasize];
-                    mbr.BaseStream.Read(data2, 0, datasize);
+                    ms.Read(data2, 0, datasize);
                     File.WriteAllBytes("rawdemo.ndm", data2);
-                    mbr.BaseStream.Seek(pos, SeekOrigin.Begin); // restore
+                    ms.Seek(pos, SeekOrigin.Begin); // restore
 #endif
-                    demo = Read(ms);
+                    demo = Read(mbr);
                 }
             }
             return demo;

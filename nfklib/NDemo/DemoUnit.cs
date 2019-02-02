@@ -100,6 +100,7 @@ namespace nfklib
         public const byte DDEMO_CTF_EVENT_FLAGDROP_APPLY_RED = 84;
         public const byte DDEMO_CTF_EVENT_FLAGRETURN_RED     = 85;
 
+        /*
         public TDMissile DMissile;
         public TDMissileV2 DMissileV2;
         public TDVectorMissile DVectorMissile;
@@ -170,6 +171,7 @@ namespace nfklib
 
         public TD_049t4_ShaftBegin D_049t4_ShaftBegin;
         public TD_049t4_ShaftEnd D_049t4_ShaftEnd;
+        */
     }
 
     // [Delphi Types]
@@ -181,46 +183,46 @@ namespace nfklib
     public struct TDData
     {
         public byte gametic;
-        public short gametime; // word
+        public ushort gametime; // word
         public byte type0;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDDamagePlayer
     {
-        public short DXID, ATTDXID; // word {x,y}
+        public ushort DXID, ATTDXID; // word {x,y}
         public byte attwpn, armor;
         public short health; // smallint
         public byte ext;
-        public short stat_dmggiven, stat_dmgrecvd;  // word
+        public ushort stat_dmggiven, stat_dmgrecvd;  // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDMissile
     {
-        public short DXID, x, y, spawnerDxid; // word
-        public int inertiax, inertiay; // single
+        public ushort DXID, x, y, spawnerDxid; // word
+        public float inertiax, inertiay; // single
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDMissileV2
     {
-        public short DXID, spawnerDxid; // word
-        public int inertiax, x, y, inertiay; // single
+        public ushort DXID, spawnerDxid; // word
+        public float inertiax, x, y, inertiay; // single
     }
 
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDPlayerJump
     {
-        public short dxid;
+        public ushort dxid;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDVectorMissile
     {
-        public short DXID, x, y, cx, cy, spawnerDxid; // word
-        public int inertiax, inertiay, angle; // single
+        public ushort DXID, x, y, cx, cy, spawnerDxid; // word
+        public float inertiax, inertiay, angle; // single
         public byte dir;
         //public byte unknown0; // FIXME: new version addition?
     }
@@ -228,7 +230,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDPlayerRename
     {
-        public short DXID;
+        public ushort DXID;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
         public string NewName; // string[30]
     }
@@ -236,31 +238,31 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDGrenadeFireV2
     {
-        public short DXID, spawnerDxid; // word
-        public int x, y, cx, cy, inertiax, inertiay, angle; // single
+        public ushort DXID, spawnerDxid; // word
+        public float x, y, cx, cy, inertiax, inertiay, angle; // single
         public byte dir;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDGrenadeSync
     {
-        public short DXID, x, y; // word
-        public int inertiax, inertiay; // single
+        public ushort DXID, x, y; // word
+        public float inertiax, inertiay; // single
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDBubble
     {
-        public short DXID;
+        public ushort DXID;
     }
 
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDPlayerUpdateV3
     {
-        public short DXID; // word
-        public int x, y, inertiax, inertiay; // single
-        public short PUV3; // word
+        public ushort DXID; // word
+        public float x, y, inertiax, inertiay; // single
+        public ushort PUV3; // word
         public byte PUV3B;
         public byte wpnang, currammo;
     }
@@ -268,7 +270,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDPlayerHAUpdate
     {
-        public short DXID; // word
+        public ushort DXID; // word
         public short health; //smallint
         public byte armor;
         public short frags; // smallint
@@ -283,21 +285,21 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDDXIDKill
     {
-        public short DXID, x, y; // word
+        public ushort DXID, x, y; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDImmediateTimeSet
     {
         public byte newgametic;
-        public short newgametime; // word
-        public short warmup; // word
+        public ushort newgametime; // word
+        public ushort warmup; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDSpawnPlayer
     {
-        public short DXID, x, y; // word
+        public ushort DXID, x, y; // word
         public byte dir, frame, dead;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
         public string modelname, netname; // string[30]
@@ -306,7 +308,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDSpawnPlayerV2
     {
-        public short DXID, x, y; // word
+        public ushort DXID, x, y; // word
         public byte dir, dead;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
         public string modelname, netname; // string[30]
@@ -317,7 +319,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDGauntletState
     {
-        public short DXID; // word
+        public ushort DXID; // word
         public byte State;
     }
 
@@ -325,36 +327,36 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDRespawnFlash
     {
-        public short x, y; // word
+        public ushort x, y; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDJumppadSound
     {
-        public short x, y; // word
+        public ushort x, y; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDRespawnSound
     {
-        public short x, y; // word
+        public ushort x, y; // word
     }
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDFlightSound
     {
-        public short x, y; // word
+        public ushort x, y; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDLavaSound
     {
-        public short x, y; // word
+        public ushort x, y; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDPowerUpSound
     {
-        public short x, y; // word
+        public ushort x, y; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -366,19 +368,19 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDRegenWork
     {
-        public short DXID; // word
+        public ushort DXID; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDFlightWork
     {
-        public short DXID; // word
+        public ushort DXID; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDEarnPowerup
     {
-        public short DXID; // word
+        public ushort DXID; // word
         public byte type1;
         public byte time;
     }
@@ -386,74 +388,74 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDEarnReward
     {
-        public short DXID; // word
+        public ushort DXID; // word
         public byte type1;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNoAmmoSound
     {
-        public short x, y; // word
+        public ushort x, y; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDStats
     {
-        public short DXID, stat_kills; // word
+        public ushort DXID, stat_kills; // word
         public int stat_dmggiven;
         public int stat_dmgrecvd;
-        public short mach_hits; // word
-        public short shot_hits; // word
-        public short gren_hits; // word
-        public short rocket_hits; // word
-        public short shaft_hits; // word
-        public short plasma_hits; // word
-        public short rail_hits; // word
-        public short bfg_hits; // word
+        public ushort mach_hits; // word
+        public ushort shot_hits; // word
+        public ushort gren_hits; // word
+        public ushort rocket_hits; // word
+        public ushort shaft_hits; // word
+        public ushort plasma_hits; // word
+        public ushort rail_hits; // word
+        public ushort bfg_hits; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDStats2
     {
-        public short DXID, stat_kills; // word
-        public short stat_suicide, stat_deaths; // word
+        public ushort DXID, stat_kills; // word
+        public ushort stat_suicide, stat_deaths; // word
         public int stat_dmggiven, frags;
         public int stat_dmgrecvd;
-        public short mach_hits; // word
-        public short shot_hits; // word
-        public short gren_hits; // word
-        public short rocket_hits; // word
-        public short shaft_hits; // word
-        public short plasma_hits; // word
-        public short rail_hits; // word
-        public short bfg_hits; // word
-        public short mach_fire, shot_fire, gren_fire, rocket_fire, shaft_fire, plasma_fire, rail_fire, bfg_fire; // word
+        public ushort mach_hits; // word
+        public ushort shot_hits; // word
+        public ushort gren_hits; // word
+        public ushort rocket_hits; // word
+        public ushort shaft_hits; // word
+        public ushort plasma_hits; // word
+        public ushort rail_hits; // word
+        public ushort bfg_hits; // word
+        public ushort mach_fire, shot_fire, gren_fire, rocket_fire, shaft_fire, plasma_fire, rail_fire, bfg_fire; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDStats3
     {
-        public short DXID, stat_kills; // word
-        public short stat_suicide, stat_deaths; // word
+        public ushort DXID, stat_kills; // word
+        public ushort stat_suicide, stat_deaths; // word
         public int stat_dmggiven, frags;
         public int stat_dmgrecvd;
-        public short bonus_impressive, bonus_excellent, bonus_humiliation; // word
-        public short gaun_hits; // word
-        public short mach_hits; // word
-        public short shot_hits; // word
-        public short gren_hits; // word
-        public short rocket_hits; // word
-        public short shaft_hits; // word
-        public short plasma_hits; // word
-        public short rail_hits; // word
-        public short bfg_hits; // word
-        public short mach_fire, shot_fire, gren_fire, rocket_fire, shaft_fire, plasma_fire, rail_fire, bfg_fire; // word
+        public ushort bonus_impressive, bonus_excellent, bonus_humiliation; // word
+        public ushort gaun_hits; // word
+        public ushort mach_hits; // word
+        public ushort shot_hits; // word
+        public ushort gren_hits; // word
+        public ushort rocket_hits; // word
+        public ushort shaft_hits; // word
+        public ushort plasma_hits; // word
+        public ushort rail_hits; // word
+        public ushort bfg_hits; // word
+        public ushort mach_fire, shot_fire, gren_fire, rocket_fire, shaft_fire, plasma_fire, rail_fire, bfg_fire; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDTrixArenaEnd
     {
-        public short DXID; // word
+        public ushort DXID; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -466,7 +468,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDReadyPress
     {
-        public short newmatch_statsin; // word
+        public ushort newmatch_statsin; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -479,34 +481,34 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCorpseSpawn
     {
-        public short DXID;
+        public ushort DXID;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDMultiplayer
     {
         public byte y;
-        public short pov; // word
+        public ushort pov; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNetRail
     {
-        public short x, y, x1, y1, endx, endy; // word
+        public ushort x, y, x1, y1, endx, endy; // word
         public byte color;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNetShotParticle
     {
-        public short x, y, x1, y1; // word
+        public ushort x, y, x1, y1; // word
         public byte index;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNETTimeUpdate
     {
-        public short Min; // word
+        public ushort Min; // word
         public byte WARMUP; // bool
     }
 
@@ -520,7 +522,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNETKickDropPlayer
     {
-        public short DXID; // word
+        public ushort DXID; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -534,14 +536,22 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNETCHATMessage
     {
-        public short DXID; // word
+        public ushort DXID; // word
         public byte messagelenght;
+    }
+    /// <summary>
+    /// Not used in demo, it used to store a message text
+    /// </summary>
+    public struct TDNETCHATMessageText
+    {
+        public TDNETCHATMessage TDNETCHATMessage;
+        public string MessageText;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNETSoundData
     {
-        public short DXID; // word
+        public ushort DXID; // word
         public byte SoundType;
     }
 
@@ -554,7 +564,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNETNameModelChange
     {
-        public short DXID; // word
+        public ushort DXID; // word
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
         public string newstr; //string[30]
     }
@@ -562,7 +572,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNETTeamSelect
     {
-        public short DXID; // word
+        public ushort DXID; // word
         public byte team;
     }
 
@@ -570,76 +580,76 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_FlagTaken
     {
-        public short DXID; // word
+        public ushort DXID; // word
         public byte x, y;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_FlagDrop
     { //drop from player..
-        public short DXID, DropDXID; // word
-        public int inertiax, inertiay; // single
+        public ushort DXID, DropDXID; // word
+        public float inertiax, inertiay; // single
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_FlagCapture
     { //Capture....
-        public short DXID; // word
+        public ushort DXID; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_FlagDroped
     { // dropped to ground, reupdate coordz.
-        public short DXID; // word
-        public int x, y; // single (4 bytes)
+        public ushort DXID; // word
+        public float x, y; // single (4 bytes)
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_DropFlag
     { // drop from player.
-        public short DXID; // word
-        public short DropperDXID; // word
-        public int X, Y; // single
-        public int Inertiax, Inertiay; // single
+        public ushort DXID; // word
+        public ushort DropperDXID; // word
+        public float X, Y; // single
+        public float Inertiax, Inertiay; // single
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDWPN_DropWeapon
     { // drop from player.
-        public short DXID; // word
-        public short DropperDXID; // word
+        public ushort DXID; // word
+        public ushort DropperDXID; // word
         public byte WeaponID;
-        public int X, Y; // single
-        public int Inertiax, Inertiay; // single
+        public float X, Y; // single
+        public float Inertiax, Inertiay; // single
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDPOWERUP_DropPowerup
     { // drop from player.
-        public short DXID; // word
-        public short DropperDXID; // word
+        public ushort DXID; // word
+        public ushort DropperDXID; // word
         public byte dir, imageindex;
-        public int X, Y; // single
-        public int Inertiax, Inertiay; // single
+        public float X, Y; // single
+        public float Inertiax, Inertiay; // single
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_DropFlagApply
     { // drop from player. coorrect flag poz
-        public short DXID; // word
-        public int X, Y;// single
+        public ushort DXID; // word
+        public float X, Y;// single
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_FlagPickUp
     { // pickup flag.
-        public short FlagDXID, PlayerDXID; // word
+        public ushort FlagDXID, PlayerDXID; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_FlagReturnFlag
     { // return flag.
-        public short FlagDXID; // word
+        public ushort FlagDXID; // word
         public byte team;
     }
 
@@ -647,25 +657,25 @@ namespace nfklib
     public struct TDCTF_GameState
     {
         public byte RedFlagAtBase, BlueFlagAtBase; // bool
-        public short RedScore, BlueScore; // word
+        public ushort RedScore, BlueScore; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_GameStateScore
     {
-        public short RedScore, BlueScore; // word
+        public ushort RedScore, BlueScore; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDCTF_FlagCarrier
     {
-        public short DXID; // word
+        public ushort DXID; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDDOM_ScoreChanges
     {
-        public short RedScore, BlueScore; // word
+        public ushort RedScore, BlueScore; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -679,13 +689,13 @@ namespace nfklib
     public struct TD_049t4_ShaftBegin
     {
         public byte AMMO;
-        public short DXID; // word
+        public ushort DXID; // word
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TD_049t4_ShaftEnd
     {
-        public short DXID; // word
+        public ushort DXID; // word
     }
 
     /* Example: c006aa00165a01 */
@@ -693,7 +703,7 @@ namespace nfklib
     public struct TD_UNKNOWN1
     {
         public int Unkn1; // dword
-        public short Unkn2; // word
+        public ushort Unkn2; // word
         public byte Unkn3;
     }
 
@@ -708,7 +718,7 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TD_UNKNOWN3
     {
-        public short Unkn1; // word
-        public short Unkn2; // word
+        public ushort Unkn1; // word
+        public ushort Unkn2; // word
     }
 }

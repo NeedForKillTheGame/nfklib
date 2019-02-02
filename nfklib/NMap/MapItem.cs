@@ -15,6 +15,7 @@ namespace nfklib.NMap
         public TMapObj[] Objects;
         public TMapEntry PaletteEntry;
         public Bitmap Palette;
+        public byte[] PaletteBytes;
         public TMapEntry LocationEntry;
         public TLocationText[] Locations;
     }

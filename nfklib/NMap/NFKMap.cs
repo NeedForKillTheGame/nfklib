@@ -98,17 +98,17 @@ namespace nfklib.NMap
 
                     var palette_data = br.ReadBytes(entry.DataSize);
                     // map nested in demo is not compressed
-                    var palette_bin = (new string(map.Header.ID) == MapInDemoHeader)
+                    map.PaletteBytes = (new string(map.Header.ID) == MapInDemoHeader)
                         ? palette_data
                         : Helper.BZDecompress(palette_data);
 
 #if DEBUG
-                    File.WriteAllBytes("map_palette.pal", palette_bin);
+                    File.WriteAllBytes("map_palette.pal", map.PaletteBytes);
 #endif
                     try
                     {
                         // 1) try without fixing
-                        map.Palette = new Bitmap(new MemoryStream(palette_bin));
+                        map.Palette = new Bitmap(new MemoryStream(map.PaletteBytes));
                     }
                     catch
                     {
@@ -117,9 +117,9 @@ namespace nfklib.NMap
                             // 1) fix it and try again
                             fixBitmapBin(ref palette_data);
 #if DEBUG
-                            File.WriteAllBytes("map_palette_fixed.pal", palette_bin);
+                            File.WriteAllBytes("map_palette_fixed.pal", map.PaletteBytes);
 #endif
-                            map.Palette = new Bitmap(new MemoryStream(palette_bin));
+                            map.Palette = new Bitmap(new MemoryStream(map.PaletteBytes));
                         }
                         catch
                         {

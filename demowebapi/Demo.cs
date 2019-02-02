@@ -14,7 +14,9 @@ namespace WindowsServiceTemplate
         public int Duration;
         public byte Version;
         public PlayerItem[] Players;
+        public List<DemoUnitItem> DemoUnits;
         public THeader MapInfo;
+        public MapItem Map;
 
         public struct PlayerItem
         {

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demowebapi", "demowebapi\demowebapi.csproj", "{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nmap2web", "nmap2web\nmap2web.csproj", "{5A284F10-C70A-4AA3-A0C2-72DA36BCFAA3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA6D183F-EEA7-43DB-AD00-1D3B1F0CA07A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A284F10-C70A-4AA3-A0C2-72DA36BCFAA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A284F10-C70A-4AA3-A0C2-72DA36BCFAA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A284F10-C70A-4AA3-A0C2-72DA36BCFAA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A284F10-C70A-4AA3-A0C2-72DA36BCFAA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

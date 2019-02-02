@@ -14,7 +14,7 @@ namespace WindowsServiceTemplate
 {
     public class DemoController : ApiController
     {
-        public async Task<Demo> Post()
+        public async Task<Demo> Post(bool full = false)
         {
             if (!Request.Content.IsMimeMultipartContent())
             {
@@ -60,6 +60,12 @@ namespace WindowsServiceTemplate
                     foreach (var s in demo.PlayerStats)
                         if (s.DXID == demo.Players[i].DXID)
                             data.Players[i].PlayerStats = s;
+                }
+
+                if (full)
+                {
+                    data.DemoUnits = demo.DemoUnits;
+                    data.Map = demo.Map;
                 }
 
                 // fix delphi strings

@@ -1,13 +1,19 @@
 <h1>NFK Demo Parser API</h1>
 
 <div style="padding: 10px 20px; border: 1px solid silver; background: #e1e1e1;">
-    <h2>Method POST</h2>
+    <h2>POST</h2>
     <script language="javascript">document.write(document.location + "demo");</script>
+    <br /><i>Return demo summary</i>
+    <br />
+    <br />
+    <script language="javascript">document.write(document.location + "demo?full=true");</script>
+    <br /><i>Return demo summary, all demo actions and map data</i>
     <br />
     <br />
     <h3>Live Example</h3>
     <form method="post" enctype="multipart/form-data" action="/demo">
         <input name="demofile" type="file" />
+        <input name="full" value="true" type="hidden" />
         <br /><br />
         <input type="submit" value="Upload NFK Demo" />
     </form>

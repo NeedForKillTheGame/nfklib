@@ -25,6 +25,7 @@ namespace test
                 {
                     Console.WriteLine("Map: {0} ({1}x{2})", Helper.GetDelphiString(demo.Map.Header.MapName), demo.Map.Header.MapSizeX, demo.Map.Header.MapSizeY);
                     Console.WriteLine("Demo duration: {0} seconds", demo.Duration);
+                    Console.WriteLine("Demo actions: {0}", demo.DemoUnits.Count);
                     Console.WriteLine();
                     foreach (var p in demo.Players)
                     {
@@ -39,13 +40,13 @@ namespace test
                                 Console.WriteLine();
                                 Console.WriteLine("Accuracy info:");
                                 Console.WriteLine("  Gaunlet:\t{0}", s.gaun_hits);
-                                Console.WriteLine("  Machine:\t{0}/{1}\t{2:0}%", s.mach_hits, s.mach_fire, s.mach_hits / ((double)s.mach_fire / 100));
-                                Console.WriteLine("  Shotgun:\t{0}/{1}\t{2:0}%", s.shot_hits, s.shot_fire, s.shot_hits / ((double)s.shot_fire / 100));
-                                Console.WriteLine("  Grenade:\t{0}/{1}\t{2:0}%", s.gren_hits, s.gren_fire, s.gren_hits / ((double)s.gren_fire / 100));
-                                Console.WriteLine("  Rocket:\t{0}/{1}\t{2:0}%", s.rocket_hits, s.rocket_fire, s.rocket_hits / ((double)s.rocket_fire / 100));
-                                Console.WriteLine("  Shaft:\t{0}/{1}\t{2:0}%", s.shaft_hits, s.shaft_fire, s.shaft_hits / ((double)s.shaft_fire / 100));
-                                Console.WriteLine("  Rail:\t\t{0}/{1}\t{2:0}%", s.rail_hits, s.rail_fire, s.rail_hits / ((double)s.rail_fire / 100));
-                                Console.WriteLine("  Plazma:\t{0}/{1}\t{2:0}%", s.plasma_hits, s.plasma_fire, s.plasma_hits / ((double)s.plasma_fire / 100));
+                                Console.WriteLine("  Machine:\t{0}/{1}\t{2:0}%", s.mach_hits, s.mach_fire, s.mach_hits == 0 ? 0 : s.mach_hits / (s.mach_fire * 0.01));
+                                Console.WriteLine("  Shotgun:\t{0}/{1}\t{2:0}%", s.shot_hits, s.shot_fire, s.shot_hits == 0 ? 0 : s.shot_hits / (s.shot_hits * 0.01));
+                                Console.WriteLine("  Grenade:\t{0}/{1}\t{2:0}%", s.gren_hits, s.gren_fire, s.gren_hits == 0 ? 0 : s.gren_hits / (s.gren_hits * 0.01));
+                                Console.WriteLine("  Rocket:\t{0}/{1}\t{2:0}%", s.rocket_hits, s.rocket_fire, s.rocket_hits == 0 ? 0 : s.rocket_hits / (s.rocket_hits * 0.01));
+                                Console.WriteLine("  Shaft:\t{0}/{1}\t{2:0}%", s.shaft_hits, s.shaft_fire, s.shaft_hits == 0 ? 0 : s.shaft_hits / (s.shaft_hits * 0.01));
+                                Console.WriteLine("  Rail:\t\t{0}/{1}\t{2:0}%", s.rail_hits, s.rail_fire, s.rail_hits == 0 ? 0 : s.rail_hits / (s.rail_hits * 0.01));
+                                Console.WriteLine("  Plazma:\t{0}/{1}\t{2:0}%", s.plasma_hits, s.plasma_fire, s.plasma_hits == 0 ? 0 : s.plasma_hits / (s.plasma_hits * 0.01));
                                 Console.WriteLine();
                                 Console.WriteLine("dmggiven\t{0}", s.stat_dmggiven);
                                 Console.WriteLine("dmgreceived\t{0}", s.stat_dmgrecvd);

@@ -43,7 +43,7 @@ namespace WindowsServiceTemplate
         }
         public void Stop()
         {
-            Log.Info("Stopping servica");
+            Log.Info("Stopping service");
             _server.CloseAsync().Wait();
             _server.Dispose();
             t.Abort();

@@ -91,11 +91,14 @@ namespace nfklib
         public const byte DDEMO_POWERUP_EVENT_PICKUP = 78;
         public const byte DDEMO_POWERUP_EVENT_POWERUPDROPGAMESTATE = 79;
 
-        // RESEARCH NEEDED!
-        public const byte DDEMO_UNKNOWN1 = 80; // TODO: unknown struct
-        public const byte DDEMO_UNKNOWN2 = 81; // TODO: unknown struct
-        public const byte DDEMO_UNKNOWN3 = 82; // FIXME: size of 28 bytes? (jumping spree?)
-
+        // conn: additional demo ctf events
+        public const byte DDEMO_CTF_EVENT_FLAGTAKEN_RED      = 80;
+        public const byte DDEMO_CTF_EVENT_FLAGCAPTURE_RED    = 81;
+        public const byte DDEMO_CTF_EVENT_FLAGDROP_RED       = 82;
+        // FIXME: (HarpyWar) unused in demo? (I could not find a demo among thousands with these events)
+        public const byte DDEMO_CTF_EVENT_FLAGPICKUP_RED     = 83;
+        public const byte DDEMO_CTF_EVENT_FLAGDROP_APPLY_RED = 84;
+        public const byte DDEMO_CTF_EVENT_FLAGRETURN_RED     = 85;
 
         public TDMissile DMissile;
         public TDMissileV2 DMissileV2;
@@ -167,7 +170,6 @@ namespace nfklib
 
         public TD_049t4_ShaftBegin D_049t4_ShaftBegin;
         public TD_049t4_ShaftEnd D_049t4_ShaftEnd;
-
     }
 
     // [Delphi Types]
@@ -684,5 +686,29 @@ namespace nfklib
     public struct TD_049t4_ShaftEnd
     {
         public short DXID; // word
+    }
+
+    /* Example: c006aa00165a01 */
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    public struct TD_UNKNOWN1
+    {
+        public int Unkn1; // dword
+        public short Unkn2; // word
+        public byte Unkn3;
+    }
+
+    /* Example: 02 */
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    public struct TD_UNKNOWN2
+    {
+        public byte Unkn;
+    }
+
+    /* Example: e32a0000 */
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    public struct TD_UNKNOWN3
+    {
+        public short Unkn1; // word
+        public short Unkn2; // word
     }
 }

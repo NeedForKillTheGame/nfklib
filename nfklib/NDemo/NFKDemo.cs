@@ -85,8 +85,6 @@ namespace nfklib.NDemo
         /// <returns></returns>
         public DemoItem Read(BinaryReader br)
         {
-
-            bool error = false;
             #region research
             //int validCounter = 5;
             //long lastErrorPos = 0;
@@ -106,7 +104,7 @@ namespace nfklib.NDemo
                 //read data!
                 d.DData = bs.ReadStruct<TDData>();
 #if DEBUG
-                Console.WriteLine("{0}: {1}", bs.Position, d.DData.type0);
+                Console.WriteLine("{0}: {1} {2} {3}", bs.Position, d.DData.gametic, d.DData.gametime, d.DData.type0);
 #endif
                 switch (d.DData.type0)
                 {
@@ -167,6 +165,7 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_GAMEEND:
                         d.DGameEnd = bs.ReadStruct<TDGameEnd>();
+                        demo.Duration = d.DData.gametime;
                         break;
                     case DemoUnit.DDEMO_RESPAWNSOUND:
                         d.DRespawnSound = bs.ReadStruct<TDRespawnSound>();
@@ -197,6 +196,8 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_STATS3:
                         d.DStats3 = bs.ReadStruct<TDStats3>();
+                        // stats of player at the end of the game
+                        demo.PlayerStats.Add(d.DStats3);
                         break;
                     case DemoUnit.DDEMO_GAMESTATE:
                         d.DGameState = bs.ReadStruct<TDGameState>();
@@ -253,6 +254,8 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_CHATMESSAGE:
                         d.DNETCHATMessage = bs.ReadStruct<TDNETCHATMessage>();
+                        // read message text
+                        var msgBytes = br.ReadBytes(d.DNETCHATMessage.messagelenght);
                         break;
                     case DemoUnit.DDEMO_PLAYERRENAME:
                         d.DNETNameModelChange = bs.ReadStruct<TDNETNameModelChange>();
@@ -329,12 +332,23 @@ namespace nfklib.NDemo
                     case DemoUnit.DDEMO_POWERUP_EVENT_PICKUP:
                         d.DCTF_FlagPickUp = bs.ReadStruct<TDCTF_FlagPickUp>();
                         break;
-                    case DemoUnit.DDEMO_UNKNOWN3:
-                        br.ReadBytes(28);
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGTAKEN_RED:
+                        bs.ReadStruct<TD_UNKNOWN1>();
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGCAPTURE_RED:
+                        bs.ReadStruct<TD_UNKNOWN2>();
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGDROP_RED:
+                        bs.ReadStruct<TD_UNKNOWN3>();
                         break;
 
+                    // unused?
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGPICKUP_RED:
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGDROP_APPLY_RED:
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGRETURN_RED:
+
                     default:
-                        error = true;
+                        throw new Exception("Unknown event. Please, send this demo to https://github.com/NeedForKillTheGame/nfklib/issues");
 
                         #region research
                         //Console.WriteLine("Pos: " + bs.Position);
@@ -351,54 +365,6 @@ namespace nfklib.NDemo
                 //else if (error && validCounter == 0)
                 //    bs.Seek(-3, SeekOrigin.Current);
                 #endregion
-
-                if (error)
-                    break;
-            }
-
-            // 2) GET DURATION
-            int i = Marshal.SizeOf(typeof(TDData)) + Marshal.SizeOf(typeof(TDGameEnd));
-            while (true)
-            {
-                bs.Seek(-i, SeekOrigin.End);
-                d.DData = bs.ReadStruct<TDData>();
-                if (d.DData.type0 == DemoUnit.DDEMO_GAMEEND)
-                {
-                    demo.Duration = d.DData.gametime;
-                    break;
-                }
-                i++;
-            }
-
-            // 3) GET PLAYER STATISTICS
-            int badStructs = 0;
-            i = Marshal.SizeOf(typeof(TDData)) + Marshal.SizeOf(typeof(TDStats3));
-            while (true)
-            {
-                bs.Seek(-i, SeekOrigin.End);
-                d.DData = bs.ReadStruct<TDData>();
-                if (d.DData.type0 == DemoUnit.DDEMO_STATS3)
-                {
-#if DEBUG
-                    Console.WriteLine(bs.Position);
-#endif
-                    d.DStats3 = bs.ReadStruct<TDStats3>();
-                    if (demo.Players.Where(x => x.DXID == d.DStats3.DXID).Count() > 0)
-                        demo.PlayerStats.Add(d.DStats3);
-                    else
-                        badStructs++;
-
-                    // if all stats was filled
-                    if (demo.PlayerStats.Count == demo.Players.Count)
-                        break;
-
-                    i += Marshal.SizeOf(typeof(TDData)) + Marshal.SizeOf(typeof(TDStats3));
-                }
-                else
-                    i++;
-
-                if (badStructs > 10)
-                    break;
             }
 
             return demo;

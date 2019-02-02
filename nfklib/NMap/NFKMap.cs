@@ -102,15 +102,39 @@ namespace nfklib.NMap
                         ? palette_data
                         : Helper.BZDecompress(palette_data);
 
-                    fixBitmapBin(ref palette_data);
-
-                    map.Palette = new Bitmap(new MemoryStream(palette_bin));
+#if DEBUG
+                    File.WriteAllBytes("map_palette.pal", palette_bin);
+#endif
+                    try
+                    {
+                        // 1) try without fixing
+                        map.Palette = new Bitmap(new MemoryStream(palette_bin));
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            // 1) fix it and try again
+                            fixBitmapBin(ref palette_data);
+#if DEBUG
+                            File.WriteAllBytes("map_palette_fixed.pal", palette_bin);
+#endif
+                            map.Palette = new Bitmap(new MemoryStream(palette_bin));
+                        }
+                        catch
+                        {
+                            // this code should never be thrown
+                            throw new Exception("Could not read palette");
+                        }
+                    }
+                    
 
                     if (entry.Reserved6 == 1)
                     {
                         // set transparent color
                         var color = Color.FromArgb(entry.Reserved5);
-                        map.Palette.MakeTransparent(color);
+                        if (map.Palette != null)
+                            map.Palette.MakeTransparent(color);
                     }
                 }
                 // locations
@@ -217,9 +241,18 @@ namespace nfklib.NMap
                         // write whole data size
                         bw.Seek(0x02, SeekOrigin.Begin);
                         bw.Write(dataSize);
-                        // write fixed data offset
-                        bw.Seek(0x0A, SeekOrigin.Begin);
-                        bw.Write(dataSize - bitmapDataSize);
+
+                        // do nothing if BMP Version 2 or 3
+                        //ms.Seek(0x0E, SeekOrigin.Begin);
+                        //var header_ver = br.ReadByte();
+                        // FIXME: sometimes delphi palette header version is messed up and it does not work
+                        //        I use the function only after exception above, if loading bmp without fix failed
+                        //if (header_ver != 0xC) // 12
+                        //{
+                            // write fixed data offset
+                            bw.Seek(0x0A, SeekOrigin.Begin);
+                            bw.Write(dataSize - bitmapDataSize);
+                        //}
                     }
                 }
             }

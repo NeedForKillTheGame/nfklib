@@ -74,7 +74,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompressAttribute.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="CorsAttribute.cs" />
     <Compile Include="Demo.cs" />
     <Compile Include="Controllers\DemoController.cs" />
     <Compile Include="Controllers\IndexController.cs" />

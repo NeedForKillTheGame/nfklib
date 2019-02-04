@@ -10,10 +10,35 @@ using System.IO;
 using System.Net.Http;
 using System.Web;
 using System.ServiceModel.Channels;
+using demowebapi;
+
 namespace WindowsServiceTemplate
 {
+    [Cors]
+    [Compress]
     public class DemoController : ApiController
     {
+        public async Task<Demo> Get(string url, bool full = false)
+        {
+            byte[] data = null;
+            try
+            {
+                using (var wc = new WebClient())
+                {
+                    data = wc.DownloadData(url);
+                }
+            }
+            catch
+            {
+                throw new Exception("Invalid demo file url");
+            }
+            using (var stream = new MemoryStream(data))
+            {
+                var demoData = readDemo(stream, full);
+                return demoData;
+            }
+        }
+
         public async Task<Demo> Post(bool full = false)
         {
             if (!Request.Content.IsMimeMultipartContent())
@@ -26,8 +51,15 @@ namespace WindowsServiceTemplate
             var streamProvider = new MultipartMemoryStreamProvider();
             // Read the MIME multipart asynchronously content using the stream provider we just created.
             await Request.Content.ReadAsMultipartAsync(streamProvider);
-            var stream = streamProvider.Contents[0].ReadAsStreamAsync().Result;
+            using (var stream = streamProvider.Contents[0].ReadAsStreamAsync().Result)
+            {
+                var demoData = readDemo(stream, full);
+                return demoData;
+            }
+        }
 
+        private Demo readDemo(Stream stream, bool full)
+        {
             Demo data = new Demo();
             nfklib.NDemo.DemoItem demo = null;
             var ndm = new nfklib.NDemo.NFKDemo();
@@ -39,9 +71,9 @@ namespace WindowsServiceTemplate
                     throw new Exception("Bad demo file");
 
                 // fix file name
-                data.FileName = (!string.IsNullOrEmpty(streamProvider.Contents[0].Headers.ContentDisposition.FileName))
-                    ? Path.GetFileName(streamProvider.Contents[0].Headers.ContentDisposition.FileName.Trim('"'))
-                    : "(stream)";
+                //data.FileName = (!string.IsNullOrEmpty(streamProvider.Contents[0].Headers.ContentDisposition.FileName))
+                //    ? Path.GetFileName(streamProvider.Contents[0].Headers.ContentDisposition.FileName.Trim('"'))
+                //    : "(stream)";
 
 
                 data.Duration = demo.Duration;
@@ -85,6 +117,5 @@ namespace WindowsServiceTemplate
             }
             return data;
         }
-
     }
 }

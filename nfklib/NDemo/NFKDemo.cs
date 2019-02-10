@@ -122,13 +122,17 @@ namespace nfklib.NDemo
                     case DemoUnit.DDEMO_TIMESET:
                         d.DemoUnit = bs.ReadStruct<TDImmediateTimeSet>();
                         break;
-                    case DemoUnit.DDEMO_CREATEPLAYER:
+                    case DemoUnit.DDEMO_CREATEPLAYER: 
+                        // not used (old version)
                         d.DemoUnit = bs.ReadStruct<TDSpawnPlayer>();
                         break;
                     case DemoUnit.DDEMO_CREATEPLAYERV2:
                         d.DemoUnit = bs.ReadStruct<TDSpawnPlayerV2>();
-                        // add a player
-                        demo.Players.Add((TDSpawnPlayerV2)d.DemoUnit);
+                        var du_ = (TDSpawnPlayerV2)d.DemoUnit;
+                        du_.netname = Helper.Windows1251ToUtf8(Helper.GetDelphiString(du_.netname));
+                        du_.modelname = Helper.GetDelphiString(du_.netname);
+                        // push a player
+                        demo.Players.Add(du_);
                         break;
                     case DemoUnit.DDEMO_KILLOBJECT:
                         d.DemoUnit = bs.ReadStruct<TDDXIDKill>();
@@ -247,6 +251,9 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_SPECTATORCONNECT:
                         d.DemoUnit = bs.ReadStruct<TDNETSpectator>();
+                        var du = (TDNETSpectator) d.DemoUnit;
+                        du.netname = Helper.Windows1251ToUtf8(Helper.GetDelphiString(du.netname));
+                        d.DemoUnit = du;
                         break;
                     case DemoUnit.DDEMO_GENERICSOUNDDATA:
                         d.DemoUnit = bs.ReadStruct<TDNETSoundData>();
@@ -259,14 +266,17 @@ namespace nfklib.NDemo
                         chatMessage.TDNETCHATMessage = bs.ReadStruct<TDNETCHATMessage>();
                         // read message text
                         var bytes = br.ReadBytes(chatMessage.TDNETCHATMessage.messagelenght);
-                        chatMessage.MessageText = Encoding.Default.GetString(bytes);
+                        chatMessage.MessageText = Encoding.GetEncoding(1251).GetString(bytes);
                         d.DemoUnit = chatMessage;
                         break;
                     case DemoUnit.DDEMO_PLAYERRENAME:
                         d.DemoUnit = bs.ReadStruct<TDNETNameModelChange>();
+                        var du__ = (TDNETNameModelChange)d.DemoUnit;
+                        du__.newstr = Helper.GetDelphiString(du__.newstr);
                         break;
                     case DemoUnit.DDEMO_PLAYERMODELCHANGE:
                         d.DemoUnit = bs.ReadStruct<TDNETNameModelChange>();
+
                         break;
                     case DemoUnit.DDEMO_TEAMSELECT:
                         d.DemoUnit = bs.ReadStruct<TDNETTeamSelect>();

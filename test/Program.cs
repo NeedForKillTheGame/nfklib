@@ -23,14 +23,14 @@ namespace test
                 var demo = ndm.Read(fileName);
                 if (demo != null)
                 {
-                    Console.WriteLine("Map: {0} ({1}x{2})", Helper.GetDelphiString(demo.Map.Header.MapName), demo.Map.Header.MapSizeX, demo.Map.Header.MapSizeY);
+                    Console.WriteLine("Map: {0} ({1}x{2})", demo.Map.Header.MapName, demo.Map.Header.MapSizeX, demo.Map.Header.MapSizeY);
                     Console.WriteLine("Demo duration: {0} seconds", demo.Duration);
                     Console.WriteLine("Demo actions: {0}", demo.DemoUnits.Count);
                     Console.WriteLine();
                     foreach (var p in demo.Players)
                     {
                         Console.WriteLine("---------------------------------------------");
-                        Console.WriteLine("Stats for {0} ({1})", Helper.GetRealNick(Helper.GetDelphiString(p.netname)), Helper.GetDelphiString(p.modelname));
+                        Console.WriteLine("Stats for {0} ({1})", Helper.GetRealNick(p.netname), p.modelname);
                         Console.WriteLine();
                         foreach (var s in demo.PlayerStats)
                         {

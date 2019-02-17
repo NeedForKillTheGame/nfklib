@@ -19,7 +19,7 @@ namespace nfklib
         public const byte DDEMO_FIREPLASMA = 7;
         public const byte DDEMO_FIREGREN = 8;
         public const byte DDEMO_FIRERAIL = 9;
-        public const byte DDEMO_FIRESHAFT = 10;
+        public const byte DDEMO_FIRESHAFT = 10; // unused (use DDEMO_NEW_SHAFTBEGIN)
         public const byte DDEMO_FIRESHOTGUN = 11;
         public const byte DDEMO_FIREMACH = 12;
         public const byte DDEMO_ITEMDISSAPEAR = 13;
@@ -224,7 +224,6 @@ namespace nfklib
         public ushort DXID, x, y, cx, cy, spawnerDxid; // word
         public float inertiax, inertiay, angle; // single
         public byte dir;
-        //public byte unknown0; // FIXME: new version addition?
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]

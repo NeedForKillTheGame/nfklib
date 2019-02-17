@@ -130,9 +130,10 @@ namespace nfklib.NDemo
                         d.DemoUnit = bs.ReadStruct<TDSpawnPlayerV2>();
                         var du_ = (TDSpawnPlayerV2)d.DemoUnit;
                         du_.netname = Helper.Windows1251ToUtf8(Helper.GetDelphiString(du_.netname));
-                        du_.modelname = Helper.GetDelphiString(du_.netname);
+                        du_.modelname = Helper.GetDelphiString(du_.modelname);
                         // push a player
                         demo.Players.Add(du_);
+                        d.DemoUnit = du_;
                         break;
                     case DemoUnit.DDEMO_KILLOBJECT:
                         d.DemoUnit = bs.ReadStruct<TDDXIDKill>();
@@ -273,10 +274,13 @@ namespace nfklib.NDemo
                         d.DemoUnit = bs.ReadStruct<TDNETNameModelChange>();
                         var du__ = (TDNETNameModelChange)d.DemoUnit;
                         du__.newstr = Helper.GetDelphiString(du__.newstr);
+                        d.DemoUnit = du__;
                         break;
                     case DemoUnit.DDEMO_PLAYERMODELCHANGE:
                         d.DemoUnit = bs.ReadStruct<TDNETNameModelChange>();
-
+                        var du___ = (TDNETNameModelChange)d.DemoUnit;
+                        du___.newstr = Helper.GetDelphiString(du___.newstr);
+                        d.DemoUnit = du___;
                         break;
                     case DemoUnit.DDEMO_TEAMSELECT:
                         d.DemoUnit = bs.ReadStruct<TDNETTeamSelect>();

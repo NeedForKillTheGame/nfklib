@@ -114,6 +114,7 @@ namespace WindowsServiceTemplate
             catch (Exception e)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.UnsupportedMediaType, e.Message));
+                Log.Error(e.ToString());
             }
             return data;
         }

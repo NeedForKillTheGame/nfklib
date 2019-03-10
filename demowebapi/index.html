@@ -3,12 +3,12 @@
 <div style="padding: 10px 20px; border: 1px solid silver; background: #e1e1e1;">
 
     <h2>POST</h2>
-    <script language="javascript">document.write(document.location + "demo?full=true");</script>
+    <script language="javascript">document.write(document.location + "demo?type=full");</script>
     <br /><i>Return demo summary. If query parameter "full=true" then include all demo actions and map data</i>
     <br />
 
     <h2>GET</h2>
-    <script language="javascript">document.write(document.location + "demo?url=http://...demo.ndm&full=true");</script>
+    <script language="javascript">document.write(document.location + "demo?url=http://...demo.ndm&type=full");</script>
     <br /><i>The same as POST method, but demo file is uploaded via query parameter "url"</i>
     <br />
     <br />
@@ -17,10 +17,16 @@
     <h3>Live Example</h3>
     <form method="post" enctype="multipart/form-data" action="/demo">
         <input name="demofile" type="file" />
-        <label for="full">Full data</label>
-        <input type="checkbox" name="full" id="full" onchange="document.forms[0].action = '/demo?full=' + this.checked" />
-        
-        <br /><br />
+        <br />
+        <br />
+        <div>
+            <label for="type">Return data:</label><br> 
+            <input type="radio" name="type" value="" onchange="document.forms[0].action = '/demo?type=' + this.value" checked> Summary<br>       
+            <input type="radio" name="type" value="chat" onchange="document.forms[0].action = '/demo?type=' + this.value"> Chat messages<br>
+            <input type="radio" name="type" value="map" onchange="document.forms[0].action = '/demo?type=' + this.value"> Map data<br>
+            <input type="radio" name="type" value="full" onchange="document.forms[0].action = '/demo?type=' + this.value"> Full data<br>
+        </div>
+        <br />
         <input type="submit" value="Upload NFK Demo" />
     </form>
 </div>

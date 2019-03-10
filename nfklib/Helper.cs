@@ -107,8 +107,11 @@ namespace nfklib
 
         public static string Windows1251ToUtf8(string str)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(str);
-            return Encoding.GetEncoding(1251).GetString(bytes);
+            // FIXME: on my windows 10 webapi return utf8 nicknames, but windows1251 on dedicated server 2008 r2
+            //        anyway we don't need to convert this, just return the original string
+            return str; 
+            //byte[] bytes = Encoding.UTF8.GetBytes(str);
+            //return Encoding.GetEncoding(1251).GetString(bytes);
         }
     }
 }

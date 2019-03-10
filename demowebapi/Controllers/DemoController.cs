@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Web;
 using System.ServiceModel.Channels;
 using demowebapi;
+using nfklib.NDemo;
 
 namespace WindowsServiceTemplate
 {
@@ -18,7 +19,7 @@ namespace WindowsServiceTemplate
     [Compress]
     public class DemoController : ApiController
     {
-        public async Task<Demo> Get(string url, bool full = false)
+        public async Task<Demo> Get(string url, string type = "")
         {
             byte[] data = null;
             try
@@ -34,12 +35,12 @@ namespace WindowsServiceTemplate
             }
             using (var stream = new MemoryStream(data))
             {
-                var demoData = readDemo(stream, full);
+                var demoData = readDemo(stream, type);
                 return demoData;
             }
         }
 
-        public async Task<Demo> Post(bool full = false)
+        public async Task<Demo> Post(string type = "")
         {
             if (!Request.Content.IsMimeMultipartContent())
             {
@@ -53,12 +54,12 @@ namespace WindowsServiceTemplate
             await Request.Content.ReadAsMultipartAsync(streamProvider);
             using (var stream = streamProvider.Contents[0].ReadAsStreamAsync().Result)
             {
-                var demoData = readDemo(stream, full);
+                var demoData = readDemo(stream, type);
                 return demoData;
             }
         }
 
-        private Demo readDemo(Stream stream, bool full)
+        private Demo readDemo(Stream stream, string type)
         {
             Demo data = new Demo();
             nfklib.NDemo.DemoItem demo = null;
@@ -93,11 +94,19 @@ namespace WindowsServiceTemplate
                         if (s.DXID == demo.Players[i].DXID)
                             data.Players[i].PlayerStats = s;
                 }
-
-                if (full)
+                
+                switch (type)
                 {
-                    data.DemoUnits = demo.DemoUnits;
-                    data.Map = demo.Map;
+                    case "chat":
+                        data.DemoUnits = demo.DemoUnits.Where(t => t.DData.type0 == DemoUnit.DDEMO_CHATMESSAGE).ToList();
+                        break;
+                    case "map":
+                        data.Map = demo.Map;
+                        break;
+                    case "full":
+                        data.DemoUnits = demo.DemoUnits;
+                        data.Map = demo.Map;
+                        break;
                 }
 
                 // fix delphi strings

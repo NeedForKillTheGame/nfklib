@@ -4,11 +4,12 @@
 
     <h2>POST</h2>
     <script language="javascript">document.write(document.location + "demo?type=full");</script>
-    <br /><i>Return demo summary. If query parameter "full=true" then include all demo actions and map data</i>
+	<br /><i>Upload demo file as multipart/form-data.</i>
+    <br /><i>Return demo summary. Query parameter "type" can be empty, "chat", "map" or "full" (include all demo actions).</i>
     <br />
 
     <h2>GET</h2>
-    <script language="javascript">document.write(document.location + "demo?url=http://...demo.ndm&type=full");</script>
+    <script language="javascript">document.write(document.location + "demo?type=full&url=http://.../demo.ndm");</script>
     <br /><i>The same as POST method, but demo file is uploaded via query parameter "url"</i>
     <br />
     <br />

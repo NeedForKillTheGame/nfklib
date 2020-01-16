@@ -1,3 +1,10 @@
+<script language="javascript">
+if ( !document.location.toString().endsWith('/') )
+{
+	window.location.replace(document.location.toString() + "/");
+}
+</script>
+
 <h1>NFK Demo Parser API</h1>
 
 <div style="padding: 10px 20px; border: 1px solid silver; background: #e1e1e1;">
@@ -16,16 +23,16 @@
 
 
     <h3>Live Example</h3>
-    <form method="post" enctype="multipart/form-data" action="/demo">
+    <form method="post" enctype="multipart/form-data" action="demo">
         <input name="demofile" type="file" />
         <br />
         <br />
         <div>
             <label for="type">Return data:</label><br> 
-            <input type="radio" name="type" value="" onchange="document.forms[0].action = '/demo?type=' + this.value" checked> Summary<br>       
-            <input type="radio" name="type" value="chat" onchange="document.forms[0].action = '/demo?type=' + this.value"> Chat messages<br>
-            <input type="radio" name="type" value="map" onchange="document.forms[0].action = '/demo?type=' + this.value"> Map data<br>
-            <input type="radio" name="type" value="full" onchange="document.forms[0].action = '/demo?type=' + this.value"> Full data<br>
+            <input type="radio" name="type" value="" onchange="document.forms[0].action = 'demo?type=' + this.value" checked> Summary<br>       
+            <input type="radio" name="type" value="chat" onchange="document.forms[0].action = 'demo?type=' + this.value"> Chat messages<br>
+            <input type="radio" name="type" value="map" onchange="document.forms[0].action = 'demo?type=' + this.value"> Map data<br>
+            <input type="radio" name="type" value="full" onchange="document.forms[0].action = 'demo?type=' + this.value"> Full data<br>
         </div>
         <br />
         <input type="submit" value="Upload NFK Demo" />

@@ -118,7 +118,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\nfklib\nfklib.csproj">
+    <ProjectReference Include="..\..\nfklib\nfklib.csproj">
       <Project>{16883b18-ccd9-4cba-a346-07afbf69bf1f}</Project>
       <Name>nfklib</Name>
     </ProjectReference>

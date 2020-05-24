@@ -7,8 +7,8 @@
     <ProjectGuid>{E0976C61-249A-4E72-A6ED-E7517B89B00E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>test</RootNamespace>
-    <AssemblyName>test</AssemblyName>
+    <RootNamespace>demostats</RootNamespace>
+    <AssemblyName>demostats</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -46,7 +46,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\nfklib\nfklib.csproj">
+    <ProjectReference Include="..\..\nfklib\nfklib.csproj">
       <Project>{16883b18-ccd9-4cba-a346-07afbf69bf1f}</Project>
       <Name>nfklib</Name>
     </ProjectReference>

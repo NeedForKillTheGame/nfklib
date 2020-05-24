@@ -14,9 +14,10 @@ namespace nfklib.NMap
     {
         public const int BrickWidth = 32;
         public const int BrickHeight = 16;
-        const string MapHeader = "NMAP"; // normal map file
-        const string MapInDemoHeader = "NDEM"; // map nested in demo file
-
+        public const string MAPHEADER = "NMAP"; // normal map file
+        public const string MAPINDEMOHEADER = "NDEM"; // map nested in demo file
+        public const byte MAPVERSION = 3;
+        public readonly char[] PALHEADER = new char[] { (char)3, 'p', 'a', 'l' };
         public MapItem map;
 
         public NFKMap()
@@ -26,8 +27,8 @@ namespace nfklib.NMap
 
         public MapItem NewMap(byte width = 20, byte height = 30)
         {
-            map.Header.ID = MapHeader.ToCharArray();
-            map.Header.Version = 3;
+            map.Header.ID = MAPHEADER.ToCharArray();
+            map.Header.Version = MAPVERSION;
 
             map.Header.MapSizeX = width;
             map.Header.MapSizeY = height;
@@ -98,7 +99,7 @@ namespace nfklib.NMap
 
                     var palette_data = br.ReadBytes(entry.DataSize);
                     // map nested in demo is not compressed
-                    map.PaletteBytes = (new string(map.Header.ID) == MapInDemoHeader)
+                    map.PaletteBytes = (new string(map.Header.ID) == MAPINDEMOHEADER)
                         ? palette_data
                         : Helper.BZDecompress(palette_data);
 
@@ -170,8 +171,23 @@ namespace nfklib.NMap
             }
         }
 
-        public void Write(BinaryWriter bw)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bw"></param>
+        /// <param name="demoMap">true for map inside demo</param>
+        public void Write(BinaryWriter bw, bool demoMap = false)
         {
+            if (demoMap)
+            {
+                map.Header.ID = MAPINDEMOHEADER.ToCharArray();
+                map.Header.Version = 7; // FIXME: if demo was written in previous versions it overwrite
+            }
+            else
+            {
+                map.Header.ID = MAPHEADER.ToCharArray();
+                map.Header.Version = MAPVERSION;
+            }
             map.Header.MapName = Helper.SetDelphiString(map.Header.MapName, 71);
             map.Header.Author = Helper.SetDelphiString(map.Header.Author, 71);
             if (map.Objects != null)
@@ -185,7 +201,7 @@ namespace nfklib.NMap
             {
                 for (int x = 0; x < map.Header.MapSizeX; x++)
                 {
-                    bw.Write(map.Bricks[x][y]);
+                    bw.BaseStream.WriteByte(map.Bricks[x][y]);
                 }
             }
             // write objects
@@ -200,11 +216,17 @@ namespace nfklib.NMap
 
             if (map.Palette != null)
             {
-                // entry
-                bw.Write(StreamExtensions.ToByteArray<TMapEntry>(map.PaletteEntry));
                 // bitmap bytes
-                var palettebin = map.Palette.ToByteArray(ImageFormat.Bmp);
-                bw.Write(Helper.BZCompress(palettebin));
+                var paletteBytes = map.Palette.ToByteArray(ImageFormat.Bmp);
+                var palettebin = demoMap
+                    ? paletteBytes
+                    : Helper.BZCompress(paletteBytes);
+
+                map.PaletteEntry.EntryType = PALHEADER;
+                map.PaletteEntry.DataSize = palettebin.Length;
+                // entries
+                bw.Write(StreamExtensions.ToByteArray<TMapEntry>(map.PaletteEntry));
+                bw.Write(palettebin);
             }
             if (map.Locations != null)
             {

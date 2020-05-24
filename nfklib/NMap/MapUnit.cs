@@ -7,6 +7,7 @@ using System.Text;
 namespace nfklib.NMap
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    [Serializable]
     public struct TMapObj
     {
         public byte active; // boolean
@@ -18,6 +19,7 @@ namespace nfklib.NMap
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    [Serializable]
     public struct THeader
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
@@ -32,6 +34,7 @@ namespace nfklib.NMap
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    [Serializable]
     public struct TMapEntry
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
@@ -46,6 +49,7 @@ namespace nfklib.NMap
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    [Serializable]
     public struct TLocationText
     {
         public byte enabled; // boolean

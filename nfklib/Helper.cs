@@ -53,7 +53,7 @@ namespace nfklib
 
             byte[] bytes = new byte[maxSize];
             Array.Copy(new byte[] {  (byte)str.Length }, bytes, 1);
-            Array.Copy(Encoding.Default.GetBytes(str), 0, bytes, 1, str.Length);
+            Array.Copy(Encoding.Default.GetBytes(str), 0, bytes, 1, str.Length - 1);
 
             return Encoding.Default.GetString(bytes);
         }
@@ -100,8 +100,9 @@ namespace nfklib
                 using (BZip2Stream zip = new BZip2Stream(stream, SharpCompress.Compressor.CompressionMode.Compress))
                 {
                     zip.Write(data, 0, data.Length);
-                    return stream.ToArray();
                 }
+                stream.Flush();
+                return stream.GetBuffer();
             }
         }
 

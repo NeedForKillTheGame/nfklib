@@ -18,9 +18,8 @@ namespace nfklib.NDemo
     {
         const string DemoHeader = "NFKDEMO";
 
-        public bool Error = false;
-        private DemoItem demo;
-
+        private byte[] demoBytes = new byte[] { };
+        public DemoItem demo;
         public NFKMap Map;
 
         public NFKDemo()
@@ -44,8 +43,8 @@ namespace nfklib.NDemo
             {
                 // check if header is bad
                 var header = br.ReadBytes(DemoHeader.Length);
-                if (Encoding.Default.GetString(header) != DemoHeader)
-                    return null;
+                if (Encoding.ASCII.GetString(header) != DemoHeader)
+                    throw new Exception("Bad demo file");
 
                 // separator 0x2D
                 br.ReadByte();
@@ -62,29 +61,27 @@ namespace nfklib.NDemo
                 using (var mbr = new BinaryReader(ms))
                 {
                     demo.Map = Map.Read(mbr);
-#if DEBUG
                     var pos = ms.Position; // remember
                     int datasize = (int)(ms.Length - ms.Position) - 1;
-                    byte[] data2 = new byte[datasize];
-                    ms.Read(data2, 0, datasize);
-                    File.WriteAllBytes("rawdemo.ndm", data2);
-                    ms.Seek(pos, SeekOrigin.Begin); // restore
+                    demoBytes = new byte[datasize];
+                    ms.Read(demoBytes, 0, datasize);
+#if DEBUG
+                    File.WriteAllBytes("rawdemo.ndm", demoBytes);
 #endif
-                    demo = Read(mbr);
+                    ms.Seek(pos, SeekOrigin.Begin); // restore
+                    demo = ReadDemo(mbr);
                 }
             }
             return demo;
         }
 
 
-
-
         /// <summary>
-        /// Read demo info from a raw demo chunk (after nmap)
+        /// Read demo info from raw demo chunk (after nmap)
         /// </summary>
         /// <param name="br"></param>
         /// <returns></returns>
-        public DemoItem Read(BinaryReader br)
+        public DemoItem ReadDemo(BinaryReader br)
         {
             #region research
             //int validCounter = 5;
@@ -105,7 +102,7 @@ namespace nfklib.NDemo
                 //read data!
                 d.DData = bs.ReadStruct<TDData>();
 #if DEBUG
-                Console.WriteLine("{0}: {1} {2} {3}", bs.Position, d.DData.gametic, d.DData.gametime, d.DData.type0);
+                //Console.WriteLine("{0}: {1} {2} {3}", bs.Position, d.DData.gametic, d.DData.gametime, d.DData.type0);
 #endif
 
                 switch (d.DData.type0)
@@ -392,6 +389,51 @@ namespace nfklib.NDemo
         }
 
 
+        public void WriteDemo(BinaryWriter bw)
+        {
+            // UNDONE: serialize all demo.DemoUnits instead of initial raw bytes
+            bw.Write(demoBytes, 0, demoBytes.Length);
+        }
+
+        public void Write(Stream stream)
+        {
+            using (var bw = new BinaryWriter(stream, Encoding.ASCII))
+            {
+                var header = Encoding.ASCII.GetBytes(DemoHeader);
+                bw.Write(header, 0, header.Length);
+
+                // separator 0x2D
+                bw.BaseStream.WriteByte(0x2D);
+
+                // gzipped data
+                using (var ms = new MemoryStream())
+                {
+                    using (var databw = new BinaryWriter(ms))
+                    {
+                        var map = new NFKMap();
+                        map.map = demo.Map;
+#if DEBUG
+                        map.Write("demomap.mapa");
+#endif
+                        map.Write(databw, true);
+                        WriteDemo(databw);
+                    }
+                    ms.Flush();
+                    var gzbytes = ms.GetBuffer();
+                    var gzdata = Helper.BZCompress(gzbytes);
+                    bw.Write(gzdata, 0, gzdata.Length);
+                }
+
+            }
+        }
+
+        public void Write(string fileName)
+        {
+            using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
+            {
+                Write(fs);
+            }
+        }
 
 
 

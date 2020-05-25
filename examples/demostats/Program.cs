@@ -12,7 +12,7 @@ namespace test
         {
             if (args.Length != 1)
             {
-                Console.WriteLine("Usage: test.exe demo.ndm");
+                Console.WriteLine("Usage: demostats.exe demo.ndm");
                 Environment.Exit(0);
             }
             var fileName = args[0];

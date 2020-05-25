@@ -3,7 +3,7 @@ NFK Helper Library
 
 Извлекает информацию из демки и из карты игры [Need For Kill](http://needforkill.ru)
 
-В [тестовой программе](https://github.com/HarpyWar/nfklib/blob/master/test/Program.cs) показан пример вывода статистики игроков:
+В [тестовой программе](https://github.com/HarpyWar/nfklib/blob/master/examples/demostats/Program.cs) показан пример вывода статистики игроков:
 
 ![](http://i.imgur.com/Y4zmfdU.png)
 
@@ -56,6 +56,18 @@ var map = nmap.Read();
 // извлечь картинку палитры
 map.Palette.Save("palette.png", ImageFormat.Png);
 ```
+
+ndm_pal_replace
+---
+Заменяет палитру у карты в файле демки
+
+nmap2web
+---
+Конвертирует NFK карту в web формат карты для [nfk-web](https://github.com/NeedForKillTheGame/nfk-web)
+
+
+---
+Позволяет заменить палитру у карты в файле демки.
 
 demowebapi
 ---

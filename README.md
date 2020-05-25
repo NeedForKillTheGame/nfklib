@@ -57,6 +57,10 @@ var map = nmap.Read();
 map.Palette.Save("palette.png", ImageFormat.Png);
 ```
 
+demostats
+---
+Показывает общую статистику по игрокам в конце игры
+
 ndm_pal_replace
 ---
 Заменяет палитру у карты в файле демки
@@ -64,10 +68,6 @@ ndm_pal_replace
 nmap2web
 ---
 Конвертирует NFK карту в web формат карты для [nfk-web](https://github.com/NeedForKillTheGame/nfk-web)
-
-
----
-Позволяет заменить палитру у карты в файле демки.
 
 demowebapi
 ---

@@ -410,12 +410,10 @@ namespace nfklib.NDemo
                 {
                     using (var databw = new BinaryWriter(ms))
                     {
-                        var map = new NFKMap();
-                        map.map = demo.Map;
 #if DEBUG
-                        map.Write("demomap.mapa");
+                        Map.Write("demomap.mapa");
 #endif
-                        map.Write(databw, true);
+                        Map.Write(databw, true);
                         WriteDemo(databw);
                     }
                     ms.Flush();

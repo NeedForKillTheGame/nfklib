@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NDemo\Constants.cs" />
     <Compile Include="NDemo\DemoItem.cs" />
     <Compile Include="NDemo\DemoUnit.cs">
       <SubType>Code</SubType>

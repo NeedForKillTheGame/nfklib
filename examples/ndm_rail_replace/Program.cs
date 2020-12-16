@@ -20,8 +20,9 @@ namespace ndm_rail_replace
             {
                 Console.WriteLine("Usage: ndm_rail_replace.exe [olddemo] [newdemo] [newrailcolor(1-8)] {playerid(1-8)}\nIf no playerid specified then color replaces for all players");
                 Console.WriteLine("Examples:");
-                Console.WriteLine("\tndm_pal_replace.exe olddemo.ndm newdemo.ndm 5");
-                Console.WriteLine("\tndm_pal_replace.exe olddemo.ndm newdemo.ndm 5 1");
+                Console.WriteLine("\tndm_rail_replace.exe olddemo.ndm newdemo.ndm 5");
+                Console.WriteLine("\tndm_rail_replace.exe olddemo.ndm newdemo.ndm 5 1");
+                Console.WriteLine("\nRail color list: {0}", getColorList());
                 Console.WriteLine("\nPress any key to exit...");
                 Console.Read();
                 Environment.Exit(0);
@@ -46,10 +47,8 @@ namespace ndm_rail_replace
                     railColor = Convert.ToByte(args[2], 10);
                     if (railColor < 1 || railColor > 8)
                     {
-                        var colorList = "";
-                        foreach (RailColor c in Enum.GetValues(typeof(RailColor)))
-                            colorList += string.Format("\n{0} = {1}", (int)c, c.ToString());
-                        throw new Exception("[ERROR] rail color must be between 1 and 8" + colorList); // \n1 = red\n2 = green\n3 = yellow\n4 = blue\n5 = teal\n6 = pink\n7 = white\n8 = black\n
+                        
+                        throw new Exception("[ERROR] rail color must be between 1 and 8" + getColorList()); // \n1 = red\n2 = green\n3 = yellow\n4 = blue\n5 = teal\n6 = pink\n7 = white\n8 = black\n
                     }
                 }
                 catch(Exception e)
@@ -82,11 +81,11 @@ namespace ndm_rail_replace
                     }
                 }
 
-                var playerWeapon = new Dictionary<int, int>();
-                // fill players weapon array
-                foreach (var p in ndm.demo.Players)
-                    if (!playerWeapon.ContainsKey(p.DXID))
-                        playerWeapon.Add(p.DXID,0);
+                Console.WriteLine("Players");
+                // print players
+                for (var i = 0; i < ndm.demo.Players.Count; i++)
+                    Console.WriteLine("\t[{0}] {1}", i + 1, ndm.demo.Players[i].netname);
+                Console.WriteLine();
 
                 bool foundRail = false;
                 for (var i = 0; i < ndm.demo.DemoUnits.Count; i++)
@@ -105,10 +104,14 @@ namespace ndm_rail_replace
                                 continue;
 
                         var pname = ndm.demo.Players.Where(t => t.DXID == unit.spawnerDxid).FirstOrDefault().netname;
-                        Console.WriteLine("Replace rail from '{0}' to '{1}' ({2})", 
+                        var min = ndm.demo.DemoUnits[i].DData.gametime / 60;
+                        var sec = ndm.demo.DemoUnits[i].DData.gametime - (ndm.demo.DemoUnits[i].DData.gametime / 60) * 60;
+                        Console.WriteLine("[({3}:{4}] Replace rail from '{0}' to '{1}' ({2})", 
                             getRailColorString(unit.dir), 
                             getRailColorString(railColor), 
-                            pname);
+                            pname,
+                            min.ToString().PadLeft(2, '0'),
+                            sec.ToString().PadLeft(2, '0'));
 
                         unit.dir = railColor;
                         ndm.demo.DemoUnits[i].DemoUnit = unit;
@@ -129,6 +132,14 @@ namespace ndm_rail_replace
                 Console.WriteLine(e.Message);
                 Environment.Exit(2);
             }
+        }
+
+        private static string getColorList()
+        {
+            var colorList = new StringBuilder();
+            foreach (RailColor c in Enum.GetValues(typeof(RailColor)))
+                colorList.AppendFormat("\n\t{0} = {1}", (int)c, c.ToString());
+            return colorList.ToString();
         }
 
         static string getRailColorString(byte color)

@@ -65,6 +65,9 @@ ndm_pal_replace
 ---
 Заменяет палитру у карты в файле демки
 
+**ndm_rail_replace**
+Заменяет цвет луча рейлгана в файле демки у всех игроков (или у определенного игрока)
+
 nmap2web
 ---
 Конвертирует NFK карту в web формат карты для [nfk-web](https://github.com/NeedForKillTheGame/nfk-web)

@@ -349,13 +349,13 @@ namespace nfklib.NDemo
                         d.DemoUnit = bs.ReadStruct<TDCTF_FlagPickUp>();
                         break;
                     case DemoUnit.DDEMO_CTF_EVENT_FLAGTAKEN_RED:
-                        bs.ReadStruct<TD_UNKNOWN1>();
+                        d.DemoUnit = bs.ReadStruct<TD_UNKNOWN1>();
                         break;
                     case DemoUnit.DDEMO_CTF_EVENT_FLAGCAPTURE_RED:
-                        bs.ReadStruct<TD_UNKNOWN2>();
+                        d.DemoUnit = bs.ReadStruct<TD_UNKNOWN2>();
                         break;
                     case DemoUnit.DDEMO_CTF_EVENT_FLAGDROP_RED:
-                        bs.ReadStruct<TD_UNKNOWN3>();
+                        d.DemoUnit = bs.ReadStruct<TD_UNKNOWN3>();
                         break;
 
                     // FIXME: unused?
@@ -391,8 +391,268 @@ namespace nfklib.NDemo
 
         public void WriteDemo(BinaryWriter bw)
         {
-            // UNDONE: serialize all demo.DemoUnits instead of initial raw bytes
-            bw.Write(demoBytes, 0, demoBytes.Length);
+            var bs = bw.BaseStream;
+            foreach (var d in demo.DemoUnits)
+            {
+                bw.Write(StreamExtensions.ToByteArray<TDData>(d.DData));
+
+                switch (d.DData.type0)
+                {
+                    case DemoUnit.DDEMO_FIREROCKET:
+                        bw.Write(StreamExtensions.ToByteArray((TDMissileV2)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_PLAYERPOSV3:
+                        bw.Write(StreamExtensions.ToByteArray((TDPlayerUpdateV3)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_FIREGRENV2:
+                        bw.Write(StreamExtensions.ToByteArray((TDGrenadeFireV2)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_TIMESET:
+                        bw.Write(StreamExtensions.ToByteArray((TDImmediateTimeSet)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CREATEPLAYER:
+                        // not used (old version)
+                        bw.Write(StreamExtensions.ToByteArray((TDSpawnPlayer)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CREATEPLAYERV2:
+                        var du = (TDSpawnPlayerV2)d.DemoUnit;
+                        // convert netname and modename back to delphi string
+                        du.netname = Helper.SetDelphiString(Helper.Utf8ToWindows1251(du.netname), 31);
+                        du.modelname = Helper.SetDelphiString(du.modelname, 31);
+                        bw.Write(StreamExtensions.ToByteArray(du));
+                        break;
+                    case DemoUnit.DDEMO_KILLOBJECT:
+                        bw.Write(StreamExtensions.ToByteArray((TDDXIDKill)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_FIREBFG:
+                        bw.Write(StreamExtensions.ToByteArray((TDMissileV2)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_FIREPLASMA:
+                        bw.Write(StreamExtensions.ToByteArray((TDMissile)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_FIREPLASMAV2:
+                        bw.Write(StreamExtensions.ToByteArray((TDMissileV2)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_FIREGREN:
+                    case DemoUnit.DDEMO_FIRERAIL:
+                    case DemoUnit.DDEMO_FIRESHAFT:
+                    case DemoUnit.DDEMO_FIRESHOTGUN:
+                    case DemoUnit.DDEMO_FIREMACH:
+                        bw.Write(StreamExtensions.ToByteArray((TDVectorMissile)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_ITEMDISSAPEAR:
+                    case DemoUnit.DDEMO_ITEMAPEAR:
+                        bw.Write(StreamExtensions.ToByteArray((TDItemDissapear)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_DAMAGEPLAYER:
+                        bw.Write(StreamExtensions.ToByteArray((TDDamagePlayer)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_HAUPDATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDPlayerHAUpdate)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_JUMPSOUND:
+                        bw.Write(StreamExtensions.ToByteArray((TDPlayerJump)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_FLASH:
+                        bw.Write(StreamExtensions.ToByteArray((TDRespawnFlash)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_GAMEEND:
+                        bw.Write(StreamExtensions.ToByteArray((TDGameEnd)d.DemoUnit));
+                        demo.Duration = d.DData.gametime;
+                        break;
+                    case DemoUnit.DDEMO_RESPAWNSOUND:
+                        bw.Write(StreamExtensions.ToByteArray((TDRespawnSound)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_LAVASOUND:
+                        bw.Write(StreamExtensions.ToByteArray((TDLavaSound)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_POWERUPSOUND:
+                        bw.Write(StreamExtensions.ToByteArray((TDPowerUpSound)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_JUMPPADSOUND:
+                        bw.Write(StreamExtensions.ToByteArray((TDJumppadSound)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_EARNPOWERUP:
+                        bw.Write(StreamExtensions.ToByteArray((TDEarnPowerup)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_FLIGHTSOUND:
+                        bw.Write(StreamExtensions.ToByteArray((TDFlightSound)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_NOAMMOSOUND:
+                        bw.Write(StreamExtensions.ToByteArray((TDNoAmmoSound)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_EARNREWARD:
+                        bw.Write(StreamExtensions.ToByteArray((TDEarnReward)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_READYPRESS:
+                        bw.Write(StreamExtensions.ToByteArray((TDReadyPress)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_STATS3:
+                        bw.Write(StreamExtensions.ToByteArray((TDStats3)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_GAMESTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDGameState)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_TRIXARENAEND:
+                        bw.Write(StreamExtensions.ToByteArray((TDTrixArenaEnd)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_OBJCHANGESTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDObjChangeState)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CORPSESPAWN:
+                        bw.Write(StreamExtensions.ToByteArray((TDCorpseSpawn)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_GRENADESYNC:
+                        bw.Write(StreamExtensions.ToByteArray((TDGrenadeSync)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_GAUNTLETSTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDGauntletState)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_BUBBLE:
+                        bw.Write(StreamExtensions.ToByteArray((TDBubble)d.DemoUnit));
+                        break;
+
+                    // multiplayer addons
+                    case DemoUnit.DDEMO_MPSTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDMultiplayer)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_NETRAIL:
+                        bw.Write(StreamExtensions.ToByteArray((TDNetRail)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_NETPARTICLE:
+                        bw.Write(StreamExtensions.ToByteArray((TDNetShotParticle)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_NETTIMEUPDATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDNETTimeUpdate)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_NETSVMATCHSTART:
+                        bw.Write(StreamExtensions.ToByteArray((TDNETSV_MatchStart)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_DROPPLAYER:
+                        bw.Write(StreamExtensions.ToByteArray((TDNETKickDropPlayer)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_SPECTATORDISCONNECT:
+                        bw.Write(StreamExtensions.ToByteArray((TDNETSpectator)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_SPECTATORCONNECT:
+                        var du1 = (TDNETSpectator)d.DemoUnit;
+                        // convert netname back to delphi string
+                        du1.netname = Helper.SetDelphiString(Helper.Utf8ToWindows1251(du1.netname), 31);
+                        bw.Write(StreamExtensions.ToByteArray(du1));
+                        break;
+                    case DemoUnit.DDEMO_GENERICSOUNDDATA:
+                        bw.Write(StreamExtensions.ToByteArray((TDNETSoundData)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_GENERICSOUNDSTATDATA:
+                        bw.Write(StreamExtensions.ToByteArray((TDNETSoundStatData)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CHATMESSAGE:
+                        // write text header
+                        bw.Write(StreamExtensions.ToByteArray(((TDNETCHATMessageText)d.DemoUnit).TDNETCHATMessage));
+                        // convert from string to bytes and write
+                        var text = ((TDNETCHATMessageText)d.DemoUnit).MessageText;
+                        var bytes = Encoding.GetEncoding(1251).GetBytes(text);
+                        bw.Write(bytes);
+                        break;
+                    case DemoUnit.DDEMO_PLAYERRENAME:
+                    case DemoUnit.DDEMO_PLAYERMODELCHANGE:
+                        var du2 = (TDNETNameModelChange)d.DemoUnit;
+                        // convert netname back to delphi string
+                        du2.newstr = Helper.SetDelphiString(du2.newstr, 31);
+                        bw.Write(StreamExtensions.ToByteArray(du2));
+                        break;
+                    case DemoUnit.DDEMO_TEAMSELECT:
+                        bw.Write(StreamExtensions.ToByteArray((TDNETTeamSelect)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGTAKEN:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_FlagTaken)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGCAPTURE:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_FlagCapture)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGDROP:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_DropFlag)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGDROPGAMESTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_DropFlag)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGDROP_APPLY:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_DropFlagApply)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGPICKUP:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_FlagPickUp)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGRETURN:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_FlagReturnFlag)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_GAMESTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_GameState)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_GAMESTATESCORE:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_GameStateScore)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_FLAGCARRIER:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_FlagCarrier)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_DOM_CAPTURE:
+                        bw.Write(StreamExtensions.ToByteArray((TDDOM_Capture)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_DOM_CAPTUREGAMESTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDDOM_Capture)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_DOM_SCORECHANGED:
+                        bw.Write(StreamExtensions.ToByteArray((TDDOM_ScoreChanges)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_WPN_EVENT_WEAPONDROP:
+                        bw.Write(StreamExtensions.ToByteArray((TDWPN_DropWeapon)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_WPN_EVENT_WEAPONDROPGAMESTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDWPN_DropWeapon)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_WPN_EVENT_WEAPONDROP_APPLY:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_DropFlagApply)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_WPN_EVENT_PICKUP:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_FlagPickUp)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_NEW_SHAFTBEGIN:
+                        bw.Write(StreamExtensions.ToByteArray((TD_049t4_ShaftBegin)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_NEW_SHAFTEND:
+                        bw.Write(StreamExtensions.ToByteArray((TD_049t4_ShaftEnd)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_POWERUP_EVENT_POWERUPDROP:
+                        bw.Write(StreamExtensions.ToByteArray((TDPOWERUP_DropPowerup)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_POWERUP_EVENT_POWERUPDROPGAMESTATE:
+                        bw.Write(StreamExtensions.ToByteArray((TDPOWERUP_DropPowerup)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_POWERUP_EVENT_PICKUP:
+                        bw.Write(StreamExtensions.ToByteArray((TDCTF_FlagPickUp)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGTAKEN_RED:
+                        bw.Write(StreamExtensions.ToByteArray((TD_UNKNOWN1)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGCAPTURE_RED:
+                        bw.Write(StreamExtensions.ToByteArray((TD_UNKNOWN2)d.DemoUnit));
+                        break;
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGDROP_RED:
+                        bw.Write(StreamExtensions.ToByteArray((TD_UNKNOWN3)d.DemoUnit));
+                        break;
+
+                    // FIXME: unused?
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGPICKUP_RED:
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGDROP_APPLY_RED:
+                    case DemoUnit.DDEMO_CTF_EVENT_FLAGRETURN_RED:
+
+                    default:
+                        throw new Exception("Unknown demo event, tell to the developer about it");
+                        break;
+                }
+
+            }
+            // HING: we can just write initial raw bytes instead of serialize all demounits
+            //bw.Write(demoBytes, 0, demoBytes.Length);
         }
 
         public void Write(Stream stream)

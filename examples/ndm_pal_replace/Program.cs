@@ -59,8 +59,11 @@ namespace ndm_pal_replace
                 if (Path.GetExtension(palOrMapFile) == ".mapa")
                 {
                     Console.WriteLine("Reading map " + palOrMapFile + "...");
+                    var demoGameType = ndm.Map.map.Header.GAMETYPE;
                     ndm.Map = new NFKMap();
                     ndm.Map.Read(palOrMapFile);
+                    // normal map file does not have gametype option, so set it from the demo
+                    ndm.Map.map.Header.GAMETYPE = demoGameType;
                 }
                 else
                 {

@@ -69,6 +69,8 @@ namespace nfklib.NMap
         {
             // map header
             map.Header = br.BaseStream.ReadStruct<THeader>();
+            map.Header.MapName = Helper.GetDelphiString(map.Header.MapName);
+            map.Header.Author = Helper.GetDelphiString(map.Header.Author);
 
             map.Bricks = new byte[map.Header.MapSizeX][];
             // read bricks (start at pos 154)
@@ -147,6 +149,7 @@ namespace nfklib.NMap
                     for (var i = 0; i < loc_count; i++)
                     {
                         map.Locations[i] = br.BaseStream.ReadStruct<TLocationText>();
+                        map.Locations[i].text = Helper.GetDelphiString(map.Locations[i].text);
                     }
                 }
                 // end of map
@@ -196,6 +199,10 @@ namespace nfklib.NMap
             // map header
             bw.Write(StreamExtensions.ToByteArray<THeader>(map.Header));
 
+            // restore strings for further usage
+            map.Header.MapName = Helper.GetDelphiString(map.Header.MapName);
+            map.Header.Author = Helper.GetDelphiString(map.Header.Author);
+            
             // write bricks 
             for (int y = 0; y < map.Header.MapSizeY; y++)
             {
@@ -237,6 +244,8 @@ namespace nfklib.NMap
                 {
                     map.Locations[i].text = Helper.SetDelphiString(map.Locations[i].text, 65);
                     bw.Write(StreamExtensions.ToByteArray<TLocationText>(map.Locations[i]));
+                    // restore string for further usage
+                    map.Locations[i].text = Helper.GetDelphiString(map.Locations[i].text);
                 }
             }
         }

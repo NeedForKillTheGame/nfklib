@@ -50,10 +50,12 @@ namespace nfklib
         public static string SetDelphiString(string str, int maxSize)
         {
             var original = str;
+            if (str.Length > maxSize - 1)
+                str = str.Substring(0, maxSize - 1);
 
             byte[] bytes = new byte[maxSize];
             Array.Copy(new byte[] {  (byte)str.Length }, bytes, 1);
-            Array.Copy(Encoding.Default.GetBytes(str), 0, bytes, 1, str.Length - 1);
+            Array.Copy(Encoding.Default.GetBytes(str), 0, bytes, 1, str.Length);
 
             return Encoding.Default.GetString(bytes);
         }

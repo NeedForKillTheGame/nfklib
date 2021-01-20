@@ -1,7 +1,8 @@
-﻿using SharpCompress.Compressor.BZip2;
+﻿using SharpCompress.Compressors.BZip2;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
@@ -69,11 +70,11 @@ namespace nfklib
         {
             // Create a GZIP stream with decompression mode.
             // ... Then create a buffer and write into while reading from the GZIP stream.
-            using (BZip2Stream stream = new BZip2Stream(new MemoryStream(data), SharpCompress.Compressor.CompressionMode.Decompress))
+            using (var stream = new BZip2Stream(new MemoryStream(data), SharpCompress.Compressors.CompressionMode.Decompress, false))
             {
                 const int size = 4096;
                 byte[] buffer = new byte[size];
-                using (MemoryStream memory = new MemoryStream())
+                using (var memory = new MemoryStream())
                 {
                     int count = 0;
                     do
@@ -97,14 +98,13 @@ namespace nfklib
         /// <returns></returns>
         public static byte[] BZCompress(byte[] data)
         {
-            using (MemoryStream stream = new MemoryStream())
+            using (var stream = new MemoryStream())
             {
-                using (BZip2Stream zip = new BZip2Stream(stream, SharpCompress.Compressor.CompressionMode.Compress))
+                using (var zip = new BZip2Stream(stream, SharpCompress.Compressors.CompressionMode.Compress, false))
                 {
                     zip.Write(data, 0, data.Length);
                 }
-                stream.Flush();
-                return stream.GetBuffer();
+                return stream.ToArray();
             }
         }
 

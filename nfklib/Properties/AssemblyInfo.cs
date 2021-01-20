@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("nfklib")]
-[assembly: AssemblyCopyright("Copyright © HarpyWar 2014")]
+[assembly: AssemblyCopyright("Copyright © HarpyWar 2014-2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

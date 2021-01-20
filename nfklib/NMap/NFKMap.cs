@@ -17,7 +17,8 @@ namespace nfklib.NMap
         public const string MAPHEADER = "NMAP"; // normal map file
         public const string MAPINDEMOHEADER = "NDEM"; // map nested in demo file
         public const byte MAPVERSION = 3;
-        public readonly char[] PALHEADER = new char[] { (char)3, 'p', 'a', 'l' };
+        public const string PALHEADER = "pal";
+        public const string LOCHEADER = "loc";
         public MapItem map;
 
         public NFKMap()
@@ -195,7 +196,7 @@ namespace nfklib.NMap
             map.Header.Author = Helper.SetDelphiString(map.Header.Author, 71);
             if (map.Objects != null)
                 map.Header.numobj = (byte)map.Objects.Length;
-
+            
             // map header
             bw.Write(StreamExtensions.ToByteArray<THeader>(map.Header));
 
@@ -229,15 +230,18 @@ namespace nfklib.NMap
                     ? paletteBytes
                     : Helper.BZCompress(paletteBytes);
 
-                map.PaletteEntry.EntryType = PALHEADER;
+                // pal header
+                map.PaletteEntry.EntryType = Helper.SetDelphiString(PALHEADER, 4).ToCharArray();
                 map.PaletteEntry.DataSize = palettebin.Length;
-                // entries
                 bw.Write(StreamExtensions.ToByteArray<TMapEntry>(map.PaletteEntry));
+                // pal body
                 bw.Write(palettebin);
             }
             if (map.Locations != null)
             {
-                // entry
+                // loc header
+                map.LocationEntry.EntryType = Helper.SetDelphiString(LOCHEADER, 4).ToCharArray();
+                map.LocationEntry.DataSize = map.Locations.Length * 68; // 68 = sizeof(TLocationText)
                 bw.Write(StreamExtensions.ToByteArray<TMapEntry>(map.LocationEntry));
                 // locations array
                 for (var i = 0; i < map.Locations.Length; i++)

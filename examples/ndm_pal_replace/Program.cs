@@ -16,7 +16,7 @@ namespace ndm_pal_replace
         static void Main(string[] args)
         {
             Console.WriteLine("The program replaces map or palette in NFK demo file.");
-            Console.WriteLine("(c) 2020 HarpyWar <harpywar@gmail.com>\n");
+            Console.WriteLine("(c) 2020-2021 HarpyWar <harpywar@gmail.com>\n");
 
             if (args.Length < 3 || args.Length > 5)
             {
@@ -88,7 +88,17 @@ namespace ndm_pal_replace
                         ndm.Map.map.Header.numlights = numlights;
                     }
                 }
+                // also rextract map
+                var oldMapfile = Path.Combine(Path.GetDirectoryName(newDemoFile), Path.GetFileNameWithoutExtension(oldDemoFile) + ".mapa");
+                ndm.Map.Write(oldMapfile);
+                Console.WriteLine(oldMapfile + " extracted from old demo!");
+
                 ndm.Write(newDemoFile);
+
+                var newMapfile = Path.Combine(Path.GetDirectoryName(newDemoFile), Path.GetFileNameWithoutExtension(newDemoFile) + ".mapa");
+                ndm.Map.Write(newMapfile);
+                Console.WriteLine(newMapfile + " extracted from new demo!");
+
                 Console.WriteLine(newDemoFile + " successfully saved!");
             }
             catch (Exception e)

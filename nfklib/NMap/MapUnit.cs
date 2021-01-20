@@ -25,10 +25,36 @@ namespace nfklib.NMap
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public char[] ID; // char[4]
         public byte Version; // byte
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 71)]
-        public string MapName; // byte header + string[70]
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 71)]
-        public string Author; // byte header + string[70]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+        public byte[] rMapName; // byte header + string[70]
+        public string MapName
+        {
+            get
+            {
+                return Helper.GetDelphiString(Encoding.Default.GetString(rMapName));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(value, Marshal.SizeOf(rMapName));
+                rMapName = Encoding.Default.GetBytes(text);
+            }
+        }
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+        public byte[] rAuthor; // byte header + string[70]
+        public string Author
+        {
+            get
+            {
+                return Helper.GetDelphiString(Encoding.Default.GetString(rAuthor));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(value, Marshal.SizeOf(rAuthor));
+                rAuthor = Encoding.Default.GetBytes(text);
+            }
+        }
+
         public byte MapSizeX, MapSizeY, BG, GAMETYPE, numobj;  // byte
         public short numlights; // word
     }
@@ -54,7 +80,20 @@ namespace nfklib.NMap
     {
         public byte enabled; // boolean
         public byte x; public byte y; // byte
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 65)]
-        public string text; // string[64]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 65)]
+        public byte[] rtext; // string[64]
+        public string text
+        {
+            get
+            {
+                return Helper.GetDelphiString(Encoding.Default.GetString(rtext));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(value, Marshal.SizeOf(rtext));
+                rtext = Encoding.Default.GetBytes(text);
+            }
+        }
+
     }
 }

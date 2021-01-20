@@ -84,11 +84,8 @@ namespace WindowsServiceTemplate
                 for (int i = 0; i < demo.Players.Count; i++)
                 {
                     data.Players[i].ID = (byte)(i + 1);
-                    data.Players[i].RealName = Helper.GetRealNick(Helper.GetDelphiString(demo.Players[i].netname));
+                    data.Players[i].RealName = demo.Players[i].realname;
                     data.Players[i].PlayerInfo = demo.Players[i];
-                    // fix delphi strings
-                    data.Players[i].PlayerInfo.netname = Helper.GetDelphiString(data.Players[i].PlayerInfo.netname);
-                    data.Players[i].PlayerInfo.modelname = Helper.GetDelphiString(data.Players[i].PlayerInfo.modelname);
 
                     foreach (var s in demo.PlayerStats)
                         if (s.DXID == demo.Players[i].DXID)
@@ -112,8 +109,6 @@ namespace WindowsServiceTemplate
                 // fix delphi strings
                 data.Version = demo.Map.Header.Version;
                 data.MapInfo = demo.Map.Header;
-                data.MapInfo.MapName = Helper.GetDelphiString(data.MapInfo.MapName);
-                data.MapInfo.Author = Helper.GetDelphiString(data.MapInfo.Author);
 
                 object property;
                 Request.Properties.TryGetValue(typeof(RemoteEndpointMessageProperty).FullName, out property);

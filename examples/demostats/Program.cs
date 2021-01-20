@@ -30,7 +30,7 @@ namespace test
                     foreach (var p in demo.Players)
                     {
                         Console.WriteLine("---------------------------------------------");
-                        Console.WriteLine("Stats for {0} ({1})", Helper.GetRealNick(p.netname), p.modelname);
+                        Console.WriteLine("Stats for {0} ({1})", p.realname, p.modelname);
                         Console.WriteLine();
                         foreach (var s in demo.PlayerStats)
                         {

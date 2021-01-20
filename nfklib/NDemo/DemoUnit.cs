@@ -226,11 +226,14 @@ namespace nfklib
         public byte dir;
     }
 
+    /// <summary>
+    /// UNUSED
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDPlayerRename
     {
         public ushort DXID;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 31)]
         public string NewName; // string[30]
     }
 
@@ -295,12 +298,15 @@ namespace nfklib
         public ushort warmup; // word
     }
 
+    /// <summary>
+    /// UNUSED
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDSpawnPlayer
     {
         public ushort DXID, x, y; // word
         public byte dir, frame, dead;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 31)]
         public string modelname, netname; // string[30]
     }
 
@@ -309,8 +315,41 @@ namespace nfklib
     {
         public ushort DXID, x, y; // word
         public byte dir, dead;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
-        public string modelname, netname; // string[30]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 31)]
+        public byte[] rmodelname, rnetname; // string[30]
+        
+        public string modelname
+        {
+            get
+            {
+                return Helper.GetDelphiString(Encoding.Default.GetString(rmodelname));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(value, Marshal.SizeOf(rmodelname));
+                rmodelname = Encoding.Default.GetBytes(text);
+            }
+        }
+        public string netname
+        {
+            get
+            {
+                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Encoding.Default.GetString(rnetname)));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), Marshal.SizeOf(rnetname));
+                rnetname = Encoding.Default.GetBytes(text);
+            }
+        }
+        public string realname
+        {
+            get
+            {
+                return Helper.GetRealNick(netname);
+            }
+        }
+
         public byte team;
         public byte reserved;
     }
@@ -370,6 +409,9 @@ namespace nfklib
         public ushort DXID; // word
     }
 
+    /// <summary>
+    /// UNUSED
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDFlightWork
     {
@@ -397,6 +439,9 @@ namespace nfklib
         public ushort x, y; // word
     }
 
+    /// <summary>
+    /// UNUSED
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDStats
     {
@@ -413,6 +458,9 @@ namespace nfklib
         public ushort bfg_hits; // word
     }
 
+    /// <summary>
+    /// UNUSED
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDStats2
     {
@@ -527,8 +575,20 @@ namespace nfklib
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDNETSpectator
     {
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
-        public string netname; // string[30]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 31)]
+        public byte[] rnetname; // string[30]
+        public string netname
+        {
+            get
+            {
+                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Encoding.Default.GetString(rnetname)));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), Marshal.SizeOf(rnetname));
+                rnetname = Encoding.Default.GetBytes(text);
+            }
+        }
         public byte action; //bool
     }
 
@@ -564,8 +624,20 @@ namespace nfklib
     public struct TDNETNameModelChange
     {
         public ushort DXID; // word
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
-        public string newstr; //string[30]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 31)]
+        public byte[] rnewstr; //string[30]
+        public string newstr
+        {
+            get
+            {
+                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Encoding.Default.GetString(rnewstr)));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), Marshal.SizeOf(rnewstr));
+                rnewstr = Encoding.Default.GetBytes(text);
+            }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]

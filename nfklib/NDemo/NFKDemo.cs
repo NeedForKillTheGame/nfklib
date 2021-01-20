@@ -124,12 +124,8 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_CREATEPLAYERV2:
                         d.DemoUnit = bs.ReadStruct<TDSpawnPlayerV2>();
-                        var du_ = (TDSpawnPlayerV2)d.DemoUnit;
-                        du_.netname = Helper.Windows1251ToUtf8(Helper.GetDelphiString(du_.netname));
-                        du_.modelname = Helper.GetDelphiString(du_.modelname);
                         // push a player
-                        demo.Players.Add(du_);
-                        d.DemoUnit = du_;
+                        demo.Players.Add((TDSpawnPlayerV2)d.DemoUnit);
                         break;
                     case DemoUnit.DDEMO_KILLOBJECT:
                         d.DemoUnit = bs.ReadStruct<TDDXIDKill>();
@@ -248,9 +244,6 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_SPECTATORCONNECT:
                         d.DemoUnit = bs.ReadStruct<TDNETSpectator>();
-                        var du = (TDNETSpectator) d.DemoUnit;
-                        du.netname = Helper.Windows1251ToUtf8(Helper.GetDelphiString(du.netname));
-                        d.DemoUnit = du;
                         break;
                     case DemoUnit.DDEMO_GENERICSOUNDDATA:
                         d.DemoUnit = bs.ReadStruct<TDNETSoundData>();
@@ -268,15 +261,9 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_PLAYERRENAME:
                         d.DemoUnit = bs.ReadStruct<TDNETNameModelChange>();
-                        var du__ = (TDNETNameModelChange)d.DemoUnit;
-                        du__.newstr = Helper.GetDelphiString(du__.newstr);
-                        d.DemoUnit = du__;
                         break;
                     case DemoUnit.DDEMO_PLAYERMODELCHANGE:
                         d.DemoUnit = bs.ReadStruct<TDNETNameModelChange>();
-                        var du___ = (TDNETNameModelChange)d.DemoUnit;
-                        du___.newstr = Helper.GetDelphiString(du___.newstr);
-                        d.DemoUnit = du___;
                         break;
                     case DemoUnit.DDEMO_TEAMSELECT:
                         d.DemoUnit = bs.ReadStruct<TDNETTeamSelect>();
@@ -415,9 +402,6 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_CREATEPLAYERV2:
                         var du = (TDSpawnPlayerV2)d.DemoUnit;
-                        // convert netname and modename back to delphi string
-                        du.netname = Helper.SetDelphiString(Helper.Utf8ToWindows1251(du.netname), 31);
-                        du.modelname = Helper.SetDelphiString(du.modelname, 31);
                         bw.Write(StreamExtensions.ToByteArray(du));
                         break;
                     case DemoUnit.DDEMO_KILLOBJECT:
@@ -535,8 +519,6 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_SPECTATORCONNECT:
                         var du1 = (TDNETSpectator)d.DemoUnit;
-                        // convert netname back to delphi string
-                        du1.netname = Helper.SetDelphiString(Helper.Utf8ToWindows1251(du1.netname), 31);
                         bw.Write(StreamExtensions.ToByteArray(du1));
                         break;
                     case DemoUnit.DDEMO_GENERICSOUNDDATA:
@@ -555,10 +537,7 @@ namespace nfklib.NDemo
                         break;
                     case DemoUnit.DDEMO_PLAYERRENAME:
                     case DemoUnit.DDEMO_PLAYERMODELCHANGE:
-                        var du2 = (TDNETNameModelChange)d.DemoUnit;
-                        // convert netname back to delphi string
-                        du2.newstr = Helper.SetDelphiString(du2.newstr, 31);
-                        bw.Write(StreamExtensions.ToByteArray(du2));
+                        bw.Write(StreamExtensions.ToByteArray((TDNETNameModelChange)d.DemoUnit));
                         break;
                     case DemoUnit.DDEMO_TEAMSELECT:
                         bw.Write(StreamExtensions.ToByteArray((TDNETTeamSelect)d.DemoUnit));

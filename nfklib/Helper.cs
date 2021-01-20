@@ -48,6 +48,7 @@ namespace nfklib
                 str = str.Substring(1, len);
             return str;
         }
+
         public static string SetDelphiString(string str, int maxSize)
         {
             var original = str;
@@ -113,8 +114,8 @@ namespace nfklib
             // FIXME: on my windows 10 webapi return utf8 nicknames, but windows1251 on dedicated server 2008 r2
             //        anyway we don't need to convert this, just return the original string
             return str; 
-            //byte[] bytes = Encoding.UTF8.GetBytes(str);
-            //return Encoding.GetEncoding(1251).GetString(bytes);
+            byte[] bytes = Encoding.UTF8.GetBytes(str);
+            return Encoding.GetEncoding(1251).GetString(bytes);
         }
 
         public static string Utf8ToWindows1251(string str)
@@ -122,8 +123,8 @@ namespace nfklib
             // FIXME: on my windows 10 webapi return utf8 nicknames, but windows1251 on dedicated server 2008 r2
             //        anyway we don't need to convert this, just return the original string
             return str; 
-            //byte[] bytes = Encoding.UTF8.GetBytes(str);
-            //return Encoding.GetEncoding(1251).GetString(bytes);
+            byte[] bytes = Encoding.UTF8.GetBytes(str);
+            return Encoding.GetEncoding(1251).GetString(bytes);
         }
     }
 }

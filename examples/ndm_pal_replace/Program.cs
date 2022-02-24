@@ -53,6 +53,12 @@ namespace ndm_pal_replace
                 Console.WriteLine("Reading demo " + oldDemoFile + "...");
                 ndm.Read(oldDemoFile);
 
+
+                // also rextract map
+                var oldMapfile = Path.Combine(Path.GetDirectoryName(newDemoFile), Path.GetFileNameWithoutExtension(oldDemoFile) + ".mapa");
+                ndm.Map.Write(oldMapfile);
+                Console.WriteLine(oldMapfile + " extracted from old demo!");
+
                 // replace palette
                 var palBytes = File.ReadAllBytes(palOrMapFile);
                 
@@ -88,10 +94,6 @@ namespace ndm_pal_replace
                         ndm.Map.map.Header.numlights = numlights;
                     }
                 }
-                // also rextract map
-                var oldMapfile = Path.Combine(Path.GetDirectoryName(newDemoFile), Path.GetFileNameWithoutExtension(oldDemoFile) + ".mapa");
-                ndm.Map.Write(oldMapfile);
-                Console.WriteLine(oldMapfile + " extracted from old demo!");
 
                 ndm.Write(newDemoFile);
 

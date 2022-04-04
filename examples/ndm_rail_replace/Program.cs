@@ -11,7 +11,7 @@ namespace ndm_rail_replace
 {
     class Program
     {
-        static List<TDSpawnPlayerV2> players = new List<TDSpawnPlayerV2>();
+        static TDSpawnPlayerV2[] players;
 
         static void Main(string[] args)
         {
@@ -49,11 +49,11 @@ namespace ndm_rail_replace
                     railColor = Convert.ToByte(args[2], 10);
                     if (railColor < 1 || railColor > 8)
                     {
-                        
+
                         throw new Exception("[ERROR] rail color must be between 1 and 8" + getColorList()); // \n1 = red\n2 = green\n3 = yellow\n4 = blue\n5 = teal\n6 = pink\n7 = white\n8 = black\n
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                     Environment.Exit(1);
@@ -91,7 +91,7 @@ namespace ndm_rail_replace
                 }
                 Console.WriteLine();
 
-                players = ndm.demo.Players;
+                players = ndm.demo.Players.ToArray();
                 bool foundRail = false;
                 for (var i = 0; i < ndm.demo.DemoUnits.Count; i++)
                 {
@@ -101,9 +101,13 @@ namespace ndm_rail_replace
                     {
                         case DemoUnit.DDEMO_PLAYERPOSV3:
                             var unit_pos = (TDPlayerUpdateV3)ndm.demo.DemoUnits[i].DemoUnit;
-                            var p = ndm.demo.Players.FirstOrDefault(x => x.DXID == unit_pos.DXID);
-                            p.x = (ushort)unit_pos.x;
-                            p.y = (ushort)unit_pos.y;
+                            for (var k = 0; k < players.Length; k++)
+                            {
+                                if (players[k].DXID != unit_pos.DXID)
+                                    continue;
+                                players[k].x = (ushort)unit_pos.x;
+                                players[k].y = (ushort)unit_pos.y;
+                            }
                             break;
 
                         // new ver
@@ -139,16 +143,15 @@ namespace ndm_rail_replace
                             if (unit2.color == railColor)
                                 continue;
 
-                            var player = getNearestPlayer(unit2.x, unit2.y);
+                            var player = getNearestPlayer(unit2.x1, unit2.y1);
                             if (playerDXID != null)
                                 if (player.DXID != playerDXID)
                                     continue;
 
-                            var pname2 = player.netname;
                             var min2 = ndm.demo.DemoUnits[i].DData.gametime / 60;
                             var sec2 = ndm.demo.DemoUnits[i].DData.gametime - (ndm.demo.DemoUnits[i].DData.gametime / 60) * 60;
-                            Console.WriteLine("[({3}:{4}] Replace rail from '{0}' to '{1}' ({2})", 
-                                getRailColorString(unit2.color), 
+                            Console.WriteLine("[({3}:{4}] Replace rail from '{0}' to '{1}' ({2})",
+                                getRailColorString(unit2.color),
                                 getRailColorString(railColor),
                                 player.netname,
                                 min2.ToString().PadLeft(2, '0'),

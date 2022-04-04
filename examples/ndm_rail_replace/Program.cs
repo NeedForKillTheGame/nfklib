@@ -11,6 +11,8 @@ namespace ndm_rail_replace
 {
     class Program
     {
+        static List<TDSpawnPlayerV2> players = new List<TDSpawnPlayerV2>();
+
         static void Main(string[] args)
         {
             Console.WriteLine("The program replaces rail color in NFK demo file.");
@@ -84,38 +86,79 @@ namespace ndm_rail_replace
                 Console.WriteLine("Players");
                 // print players
                 for (var i = 0; i < ndm.demo.Players.Count; i++)
+                {
                     Console.WriteLine("\t[{0}] {1}", i + 1, ndm.demo.Players[i].netname);
+                }
                 Console.WriteLine();
 
+                players = ndm.demo.Players;
                 bool foundRail = false;
                 for (var i = 0; i < ndm.demo.DemoUnits.Count; i++)
                 {
                     var type = ndm.demo.DemoUnits[i].DData.type0;
 
-                    if (type == DemoUnit.DDEMO_FIRERAIL)
+                    switch (type)
                     {
-                        var unit = (TDVectorMissile)ndm.demo.DemoUnits[i].DemoUnit;
-                        if (unit.dir == railColor)
-                            continue;
+                        case DemoUnit.DDEMO_PLAYERPOSV3:
+                            var unit_pos = (TDPlayerUpdateV3)ndm.demo.DemoUnits[i].DemoUnit;
+                            var p = ndm.demo.Players.FirstOrDefault(x => x.DXID == unit_pos.DXID);
+                            p.x = (ushort)unit_pos.x;
+                            p.y = (ushort)unit_pos.y;
+                            break;
 
-                        // filter by player if given
-                        if (playerDXID != null)
-                            if (unit.spawnerDxid != playerDXID)
+                        // new ver
+                        case DemoUnit.DDEMO_FIRERAIL:
+                            var unit1 = (TDVectorMissile)ndm.demo.DemoUnits[i].DemoUnit;
+                            if (unit1.dir == railColor)
                                 continue;
 
-                        var pname = ndm.demo.Players.Where(t => t.DXID == unit.spawnerDxid).FirstOrDefault().netname;
-                        var min = ndm.demo.DemoUnits[i].DData.gametime / 60;
-                        var sec = ndm.demo.DemoUnits[i].DData.gametime - (ndm.demo.DemoUnits[i].DData.gametime / 60) * 60;
-                        Console.WriteLine("[({3}:{4}] Replace rail from '{0}' to '{1}' ({2})", 
-                            getRailColorString(unit.dir), 
-                            getRailColorString(railColor), 
-                            pname,
-                            min.ToString().PadLeft(2, '0'),
-                            sec.ToString().PadLeft(2, '0'));
+                            // filter by player if given
+                            if (playerDXID != null)
+                                if (unit1.spawnerDxid != playerDXID)
+                                    continue;
 
-                        unit.dir = railColor;
-                        ndm.demo.DemoUnits[i].DemoUnit = unit;
-                        foundRail = true;
+                            var pname = ndm.demo.Players.Where(t => t.DXID == unit1.spawnerDxid).FirstOrDefault().netname;
+                            var min = ndm.demo.DemoUnits[i].DData.gametime / 60;
+                            var sec = ndm.demo.DemoUnits[i].DData.gametime - (ndm.demo.DemoUnits[i].DData.gametime / 60) * 60;
+                            Console.WriteLine("[({3}:{4}] Replace rail from '{0}' to '{1}' ({2})",
+                                getRailColorString(unit1.dir),
+                                getRailColorString(railColor),
+                                pname,
+                                min.ToString().PadLeft(2, '0'),
+                                sec.ToString().PadLeft(2, '0'));
+
+                            unit1.dir = railColor;
+                            ndm.demo.DemoUnits[i].DemoUnit = unit1;
+                            foundRail = true;
+
+                            break;
+
+                        // old ver
+                        case DemoUnit.DDEMO_NETRAIL:
+                            var unit2 = (TDNetRail)ndm.demo.DemoUnits[i].DemoUnit;
+                            if (unit2.color == railColor)
+                                continue;
+
+                            var player = getNearestPlayer(unit2.x, unit2.y);
+                            if (playerDXID != null)
+                                if (player.DXID != playerDXID)
+                                    continue;
+
+                            var pname2 = player.netname;
+                            var min2 = ndm.demo.DemoUnits[i].DData.gametime / 60;
+                            var sec2 = ndm.demo.DemoUnits[i].DData.gametime - (ndm.demo.DemoUnits[i].DData.gametime / 60) * 60;
+                            Console.WriteLine("[({3}:{4}] Replace rail from '{0}' to '{1}' ({2})", 
+                                getRailColorString(unit2.color), 
+                                getRailColorString(railColor),
+                                player.netname,
+                                min2.ToString().PadLeft(2, '0'),
+                                sec2.ToString().PadLeft(2, '0'));
+
+                            unit2.color = railColor;
+                            ndm.demo.DemoUnits[i].DemoUnit = unit2;
+                            foundRail = true;
+
+                            break;
                     }
                 }
                 if (!foundRail)
@@ -142,6 +185,29 @@ namespace ndm_rail_replace
             return colorList.ToString();
         }
 
+        /// <summary>
+        /// Find nearest player to the point
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        private static TDSpawnPlayerV2 getNearestPlayer(int x, int y)
+        {
+            TDSpawnPlayerV2 player = new TDSpawnPlayerV2();
+            foreach (var p in players)
+            {
+                var player_distance_x = Math.Abs(Math.Abs(player.x) - Math.Abs(x));
+                var player_distance_y = Math.Abs(Math.Abs(player.y) - Math.Abs(y));
+                var p_distance_x = Math.Abs(Math.Abs(p.x) - Math.Abs(x));
+                var p_distance_y = Math.Abs(Math.Abs(p.y) - Math.Abs(y));
+                if (p_distance_x < player_distance_x && p_distance_y < player_distance_y)
+                {
+                    player = p;
+                }
+            }
+            return player;
+        }
+
         static string getRailColorString(byte color)
         {
             return ((RailColor)color).ToString();
@@ -157,5 +223,7 @@ namespace ndm_rail_replace
             white = 7,
             black = 8
         }
+
+
     }
 }

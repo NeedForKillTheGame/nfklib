@@ -1,8 +1,7 @@
-﻿using SharpCompress.Compressors.BZip2;
+using SharpCompress.Compressors.BZip2;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
@@ -10,6 +9,17 @@ namespace nfklib
 {
     public static class Helper
     {
+        /// <summary>
+        /// Code page of all strings stored inside NFK files (Delphi, Windows-1251).
+        /// Encoding.Default is UTF-8 on .NET Core, so it must not be used for them.
+        /// </summary>
+        public static Encoding DelphiEncoding => _delphiEncoding.Value;
+        private static readonly Lazy<Encoding> _delphiEncoding = new(() =>
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            return Encoding.GetEncoding(1251);
+        });
+
 
         /// <summary>
         /// Clear nickname from special symbols
@@ -57,38 +67,44 @@ namespace nfklib
 
             byte[] bytes = new byte[maxSize];
             Array.Copy(new byte[] {  (byte)str.Length }, bytes, 1);
-            Array.Copy(Encoding.Default.GetBytes(str), 0, bytes, 1, str.Length);
+            Array.Copy(DelphiEncoding.GetBytes(str), 0, bytes, 1, str.Length);
 
-            return Encoding.Default.GetString(bytes);
+            return DelphiEncoding.GetString(bytes);
         }
+
+        /// <summary>
+        /// Default upper bound for <see cref="BZDecompress(byte[], long)"/>: a bzip2 bomb of a few KB can expand
+        /// to gigabytes, real demos and map palettes expand to a few MB at most.
+        /// </summary>
+        public const long DefaultMaxDecompressedSize = 256L * 1024 * 1024;
 
         /// <summary>
         /// Decompress BZip2 data
         /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static byte[] BZDecompress(byte[] data)
+        /// <param name="data">bzip2 stream</param>
+        /// <param name="maxSize">maximum allowed size of the decompressed data</param>
+        /// <exception cref="InvalidDataException">the data is not a valid bzip2 stream, or the decompressed data would exceed <paramref name="maxSize"/></exception>
+        public static byte[] BZDecompress(byte[] data, long maxSize = DefaultMaxDecompressedSize)
         {
-            // Create a GZIP stream with decompression mode.
-            // ... Then create a buffer and write into while reading from the GZIP stream.
-            using (var stream = new BZip2Stream(new MemoryStream(data), SharpCompress.Compressors.CompressionMode.Decompress, false))
+            try
             {
-                const int size = 4096;
-                byte[] buffer = new byte[size];
+                using (var stream = new BZip2Stream(new MemoryStream(data), SharpCompress.Compressors.CompressionMode.Decompress, false))
                 using (var memory = new MemoryStream())
                 {
-                    int count = 0;
-                    do
+                    var buffer = new byte[64 * 1024];
+                    int count;
+                    while ((count = stream.Read(buffer, 0, buffer.Length)) > 0)
                     {
-                        count = stream.Read(buffer, 0, size);
-                        if (count > 0)
-                        {
-                            memory.Write(buffer, 0, count);
-                        }
+                        if (memory.Length + count > maxSize)
+                            throw new InvalidDataException($"Decompressed data exceeds the limit of {maxSize} bytes");
+                        memory.Write(buffer, 0, count);
                     }
-                    while (count > 0);
                     return memory.ToArray();
                 }
+            }
+            catch (Exception e) when (e is not InvalidDataException)
+            {
+                throw new InvalidDataException("Bad bzip2 data: " + e.Message, e);
             }
         }
 
@@ -109,22 +125,14 @@ namespace nfklib
             }
         }
 
-        public static string Windows1251ToUtf8(string str)
-        {
-            // FIXME: on my windows 10 webapi return utf8 nicknames, but windows1251 on dedicated server 2008 r2
-            //        anyway we don't need to convert this, just return the original string
-            return str; 
-            byte[] bytes = Encoding.UTF8.GetBytes(str);
-            return Encoding.GetEncoding(1251).GetString(bytes);
-        }
+        /// <summary>
+        /// Kept for compatibility: strings are already decoded with <see cref="DelphiEncoding"/>.
+        /// </summary>
+        public static string Windows1251ToUtf8(string str) => str;
 
-        public static string Utf8ToWindows1251(string str)
-        {
-            // FIXME: on my windows 10 webapi return utf8 nicknames, but windows1251 on dedicated server 2008 r2
-            //        anyway we don't need to convert this, just return the original string
-            return str; 
-            byte[] bytes = Encoding.UTF8.GetBytes(str);
-            return Encoding.GetEncoding(1251).GetString(bytes);
-        }
+        /// <summary>
+        /// Kept for compatibility: strings are encoded with <see cref="DelphiEncoding"/> on write.
+        /// </summary>
+        public static string Utf8ToWindows1251(string str) => str;
     }
 }

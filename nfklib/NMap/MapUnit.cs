@@ -31,12 +31,12 @@ namespace nfklib.NMap
         {
             get
             {
-                return Helper.GetDelphiString(Encoding.Default.GetString(rMapName));
+                return Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rMapName));
             }
             set
             {
-                var text = Helper.SetDelphiString(value, Marshal.SizeOf(rMapName));
-                rMapName = Encoding.Default.GetBytes(text);
+                var text = Helper.SetDelphiString(value, 71);
+                rMapName = Helper.DelphiEncoding.GetBytes(text);
             }
         }
 
@@ -46,12 +46,12 @@ namespace nfklib.NMap
         {
             get
             {
-                return Helper.GetDelphiString(Encoding.Default.GetString(rAuthor));
+                return Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rAuthor));
             }
             set
             {
-                var text = Helper.SetDelphiString(value, Marshal.SizeOf(rAuthor));
-                rAuthor = Encoding.Default.GetBytes(text);
+                var text = Helper.SetDelphiString(value, 71);
+                rAuthor = Helper.DelphiEncoding.GetBytes(text);
             }
         }
 
@@ -86,12 +86,12 @@ namespace nfklib.NMap
         {
             get
             {
-                return Helper.GetDelphiString(Encoding.Default.GetString(rtext));
+                return Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rtext));
             }
             set
             {
-                var text = Helper.SetDelphiString(value, Marshal.SizeOf(rtext));
-                rtext = Encoding.Default.GetBytes(text);
+                var text = Helper.SetDelphiString(value, 65);
+                rtext = Helper.DelphiEncoding.GetBytes(text);
             }
         }
 

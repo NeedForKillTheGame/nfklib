@@ -1,12 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using nfklib;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.Processing;
 
 namespace nfklib.NMap
 {
@@ -20,6 +23,27 @@ namespace nfklib.NMap
         public const string PALHEADER = "pal";
         public const string LOCHEADER = "loc";
         public MapItem map;
+
+        /// <summary>
+        /// Upper bound for the decoded palette image (width * height). Palettes of real maps are a few
+        /// hundred pixels wide, the limit only guards against image bombs in crafted files.
+        /// </summary>
+        public static long MaxPalettePixels { get; set; } = 4096L * 4096;
+
+        /// <summary>
+        /// Hard cap for the memory the image decoder may allocate for one palette
+        /// </summary>
+        public const int MaxPaletteDecoderMegabytes = 256;
+
+        private static readonly Lazy<Configuration> _paletteConfiguration = new(() =>
+        {
+            var configuration = Configuration.Default.Clone();
+            configuration.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions
+            {
+                AllocationLimitMegabytes = MaxPaletteDecoderMegabytes
+            });
+            return configuration;
+        });
 
         public NFKMap()
         {
@@ -60,7 +84,7 @@ namespace nfklib.NMap
 
         public MapItem Read(Stream stream)
         {
-            using (var br = new BinaryReader(stream, Encoding.ASCII))
+            using (var br = new BinaryReader(stream, Encoding.ASCII, leaveOpen: true))
             {
                 return Read(br);
             }
@@ -89,60 +113,54 @@ namespace nfklib.NMap
                 map.Objects[i] = br.BaseStream.ReadStruct<TMapObj>();
 
             // read pal and loc blocks
-            while (br.BaseStream.Length > br.BaseStream.Position)
+            var entrySize = Marshal.SizeOf<TMapEntry>();
+            while (br.BaseStream.Length - br.BaseStream.Position >= entrySize)
             {
                 var entry = br.BaseStream.ReadStruct<TMapEntry>();
+                var entryType = new string(entry.EntryType);
+                var isPalette = entryType.EndsWith(PALHEADER);
+                var isLocations = entryType.EndsWith(LOCHEADER);
+
+                // end of map
+                if (!isPalette && !isLocations)
+                {
+                    // restore position to correctly read demo
+                    br.BaseStream.Seek(-entrySize, SeekOrigin.Current);
+                    break;
+                }
+
+                if (entry.DataSize < 0 || entry.DataSize > br.BaseStream.Length - br.BaseStream.Position)
+                    throw new InvalidDataException($"Bad size of the map \"{Helper.GetDelphiString(entryType)}\" entry: {entry.DataSize}");
 
                 // palette
-                if (new string(entry.EntryType).EndsWith("pal"))
+                if (isPalette)
                 {
                     map.PaletteEntry = entry;
 
                     var palette_data = br.ReadBytes(entry.DataSize);
                     // map nested in demo is not compressed
-                    map.PaletteBytes = (new string(map.Header.ID) == MAPINDEMOHEADER)
+                    var paletteBytes = (new string(map.Header.ID) == MAPINDEMOHEADER)
                         ? palette_data
                         : Helper.BZDecompress(palette_data);
 
-#if DEBUG
-                    File.WriteAllBytes("map_palette.pal", map.PaletteBytes);
-#endif
-                    try
-                    {
-                        // 1) try without fixing
-                        map.Palette = new Bitmap(new MemoryStream(map.PaletteBytes));
-                    }
-                    catch
-                    {
-                        try
-                        {
-                            // 1) fix it and try again
-                            fixBitmapBin(ref palette_data);
-#if DEBUG
-                            File.WriteAllBytes("map_palette_fixed.pal", map.PaletteBytes);
-#endif
-                            map.Palette = new Bitmap(new MemoryStream(map.PaletteBytes));
-                        }
-                        catch
-                        {
-                            // this code should never be thrown
-                            throw new Exception("Could not read palette");
-                        }
-                    }
-                    
+                    map.Palette = LoadPalette(paletteBytes);
+                    map.PaletteBytes = paletteBytes;
 
                     if (entry.Reserved6 == 1)
                     {
+                        int a = (entry.Reserved5 >> 24) & 0xff; // or color >>> 24
+                        int r = (entry.Reserved5 >> 16) & 0xff;
+                        int g = (entry.Reserved5 >>  8) & 0xff;
+                        int b = (entry.Reserved5) & 0xff;
                         // set transparent color
-                        var color = Color.FromArgb(entry.Reserved5);
-                        if (map.Palette != null)
-                            map.Palette.MakeTransparent(color);
+                        var color = Color.FromRgba((byte)r, (byte)g, (byte)b, (byte)a);
+                        map.Palette.Mutate(x => x.BackgroundColor(color));
                     }
                 }
                 // locations
-                else if (new string(entry.EntryType).EndsWith("loc"))
+                else
                 {
-                    var loc_count = entry.DataSize / Marshal.SizeOf(typeof(TLocationText));
+                    var loc_count = entry.DataSize / Marshal.SizeOf<TLocationText>();
                     map.Locations = new TLocationText[loc_count];
                     map.LocationEntry = entry;
                     for (var i = 0; i < loc_count; i++)
@@ -150,14 +168,7 @@ namespace nfklib.NMap
                         map.Locations[i] = br.BaseStream.ReadStruct<TLocationText>();
                     }
                 }
-                // end of map
-                else
-                {
-                    // restore position to correctly read demo
-                    br.BaseStream.Seek(-(Marshal.SizeOf(typeof(TMapEntry))), SeekOrigin.Current);
-                    break;
-                }
-            } 
+            }
             return map;
         }
 
@@ -217,7 +228,7 @@ namespace nfklib.NMap
             if (map.Palette != null)
             {
                 // bitmap bytes
-                var paletteBytes = map.Palette.ToByteArray(ImageFormat.Bmp);
+                var paletteBytes = map.Palette.ToByteArray(new BmpEncoder());
                 var palettebin = demoMap
                     ? paletteBytes
                     : Helper.BZCompress(paletteBytes);
@@ -244,41 +255,80 @@ namespace nfklib.NMap
         }
 
         /// <summary>
+        /// Decode the palette image. Any format ImageSharp knows is accepted, but the image must fit into
+        /// <see cref="MaxPalettePixels"/> and the decoder works with a capped allocator and a single frame.
+        /// </summary>
+        /// <param name="data">image bytes; a broken Delphi BMP header is fixed in place (see <see cref="fixBitmapBin"/>)</param>
+        /// <exception cref="InvalidDataException">the data is not an image, or it is too large</exception>
+        private static Image LoadPalette(byte[] data)
+        {
+            var options = new DecoderOptions
+            {
+                Configuration = _paletteConfiguration.Value,
+                MaxFrames = 1,
+            };
+
+            for (var attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    // header only: check the dimensions before anything is allocated for the pixels
+                    var info = Image.Identify(options, data);
+                    if ((long)info.Width * info.Height > MaxPalettePixels)
+                        throw new InvalidDataException($"Palette image {info.Width}x{info.Height} is too large (limit {MaxPalettePixels} pixels)");
+
+                    return Image.Load(options, data);
+                }
+                catch (InvalidDataException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    if (attempt > 0)
+                        throw new InvalidDataException("Could not read palette: " + e.Message, e);
+
+                    // Delphi sometimes writes a broken BMP header: fix it and try again
+                    fixBitmapBin(data);
+                }
+            }
+        }
+
+        /// <summary>
         /// https://github.com/HarpyWar/nfkmap-viewer/wiki/BMP-картинка-палитры
+        /// Fixes the file size and the pixel data offset in a BMP file header (in place)
         /// </summary>
         /// <param name="data"></param>
-        private void fixBitmapBin(ref byte[] data)
+        private static void fixBitmapBin(byte[] data)
         {
+            const int headerSize = 0x26; // BITMAPFILEHEADER + the part of BITMAPINFOHEADER up to biSizeImage
+            if (data.Length < headerSize)
+                return;
+
             int dataSize = data.Length;
-            int bitmapDataSize;
-
             using (var ms = new MemoryStream(data))
+            using (var br = new BinaryReader(ms))
+            using (var bw = new BinaryWriter(ms))
             {
-                using (var br = new BinaryReader(ms))
-                {
-                    // read bitmap data length
-                    ms.Seek(0x22, SeekOrigin.Begin);
-                    bitmapDataSize = br.ReadInt32();
+                // read bitmap data length
+                ms.Seek(0x22, SeekOrigin.Begin);
+                var bitmapDataSize = br.ReadInt32();
 
-                    using (var bw = new BinaryWriter(ms))
-                    {
-                        // write whole data size
-                        bw.Seek(0x02, SeekOrigin.Begin);
-                        bw.Write(dataSize);
+                // write whole data size
+                bw.Seek(0x02, SeekOrigin.Begin);
+                bw.Write(dataSize);
 
-                        // do nothing if BMP Version 2 or 3
-                        //ms.Seek(0x0E, SeekOrigin.Begin);
-                        //var header_ver = br.ReadByte();
-                        // FIXME: sometimes delphi palette header version is messed up and it does not work
-                        //        I use the function only after exception above, if loading bmp without fix failed
-                        //if (header_ver != 0xC) // 12
-                        //{
-                            // write fixed data offset
-                            bw.Seek(0x0A, SeekOrigin.Begin);
-                            bw.Write(dataSize - bitmapDataSize);
-                        //}
-                    }
-                }
+                // do nothing if BMP Version 2 or 3
+                //ms.Seek(0x0E, SeekOrigin.Begin);
+                //var header_ver = br.ReadByte();
+                // FIXME: sometimes delphi palette header version is messed up and it does not work
+                //        I use the function only after exception above, if loading bmp without fix failed
+                //if (header_ver != 0xC) // 12
+                //{
+                    // write fixed data offset
+                    bw.Seek(0x0A, SeekOrigin.Begin);
+                    bw.Write(dataSize - bitmapDataSize);
+                //}
             }
         }
     }

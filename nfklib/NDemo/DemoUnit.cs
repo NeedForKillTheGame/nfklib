@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -299,7 +299,7 @@ namespace nfklib
     }
 
     /// <summary>
-    /// UNUSED
+    /// UNUSED (old demo version, replaced by <see cref="TDSpawnPlayerV2"/>)
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TDSpawnPlayer
@@ -307,7 +307,32 @@ namespace nfklib
         public ushort DXID, x, y; // word
         public byte dir, frame, dead;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 31)]
-        public string modelname, netname; // string[30]
+        public byte[] rmodelname, rnetname; // string[30]
+
+        public string modelname
+        {
+            get
+            {
+                return Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rmodelname));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(value, 31);
+                rmodelname = Helper.DelphiEncoding.GetBytes(text);
+            }
+        }
+        public string netname
+        {
+            get
+            {
+                return Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rnetname));
+            }
+            set
+            {
+                var text = Helper.SetDelphiString(value, 31);
+                rnetname = Helper.DelphiEncoding.GetBytes(text);
+            }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -322,24 +347,24 @@ namespace nfklib
         {
             get
             {
-                return Helper.GetDelphiString(Encoding.Default.GetString(rmodelname));
+                return Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rmodelname));
             }
             set
             {
-                var text = Helper.SetDelphiString(value, Marshal.SizeOf(rmodelname));
-                rmodelname = Encoding.Default.GetBytes(text);
+                var text = Helper.SetDelphiString(value, 31);
+                rmodelname = Helper.DelphiEncoding.GetBytes(text);
             }
         }
         public string netname
         {
             get
             {
-                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Encoding.Default.GetString(rnetname)));
+                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rnetname)));
             }
             set
             {
-                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), Marshal.SizeOf(rnetname));
-                rnetname = Encoding.Default.GetBytes(text);
+                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), 31);
+                rnetname = Helper.DelphiEncoding.GetBytes(text);
             }
         }
         public string realname
@@ -581,12 +606,12 @@ namespace nfklib
         {
             get
             {
-                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Encoding.Default.GetString(rnetname)));
+                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rnetname)));
             }
             set
             {
-                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), Marshal.SizeOf(rnetname));
-                rnetname = Encoding.Default.GetBytes(text);
+                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), 31);
+                rnetname = Helper.DelphiEncoding.GetBytes(text);
             }
         }
         public byte action; //bool
@@ -630,12 +655,12 @@ namespace nfklib
         {
             get
             {
-                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Encoding.Default.GetString(rnewstr)));
+                return Helper.Windows1251ToUtf8(Helper.GetDelphiString(Helper.DelphiEncoding.GetString(rnewstr)));
             }
             set
             {
-                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), Marshal.SizeOf(rnewstr));
-                rnewstr = Encoding.Default.GetBytes(text);
+                var text = Helper.SetDelphiString(Helper.Utf8ToWindows1251(value), 31);
+                rnewstr = Helper.DelphiEncoding.GetBytes(text);
             }
         }
     }

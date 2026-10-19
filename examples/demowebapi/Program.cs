@@ -1,112 +1,78 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.ServiceProcess;
-using System.Text;
-using System.Web.Http;
-using System.Web.Http.SelfHost;
+using System.Text.Encodings.Web;
+using System.Text.Json.Serialization;
+using demowebapi.Controllers;
+using demowebapi.Services;
+using Microsoft.AspNetCore.ResponseCompression;
 
-namespace WindowsServiceTemplate
-{
-    static class Program
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
     {
-        private static Service service;
+        var json = options.JsonSerializerOptions;
+        // The demoviewer relies on the exact member names of nfklib structures (PascalCase, public fields).
+        json.PropertyNamingPolicy = null;
+        json.IncludeFields = true;
+        // Demo files may contain NaN/Infinity floats, write them as literals instead of throwing.
+        json.NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals;
+        // Keep cyrillic nicknames and chat as plain UTF-8 instead of \uXXXX escapes.
+        json.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+    });
 
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        static void Main(string[] args)
-        {
-            // self service installer/uninstaller
-            if (args != null && args.Length == 1
-                && (args[0][0] == '-' || args[0][0] == '/'))
-            {
-                switch (args[0].Substring(1).ToLower())
-                {
-                    case "install":
-                    case "i":
-                        if (!ServiceInstallerUtility.InstallMe())
-                            Console.WriteLine("Failed to install service");
-                        break;
-                    case "uninstall":
-                    case "u":
-                        if (!ServiceInstallerUtility.UninstallMe())
-                            Console.WriteLine("Failed to uninstall service");
-                        break;
-                    default:
-                        Console.WriteLine("Unrecognized parameters (allowed: /install or /uninstall).");
-                        break;
-                }
-                Environment.Exit(0);
-            }
+builder.Services.AddProblemDetails();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlDocs = Path.Combine(AppContext.BaseDirectory, $"{typeof(Program).Assembly.GetName().Name}.xml");
+    if (File.Exists(xmlDocs))
+        options.IncludeXmlComments(xmlDocs);
+});
 
-            service = new Service();
-            ServiceBase[] servicesToRun = new ServiceBase[] { service };
+// The parser is consumed from other origins (demo viewers), same as the old [Cors] attribute allowed.
+builder.Services.AddCors(options =>
+    options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-            // console mode
-            if (Environment.UserInteractive)
-            {
-                // register console close event
-                _consoleHandler = new ConsoleCtrlHandlerDelegate(ConsoleEventHandler);
-                SetConsoleCtrlHandler(_consoleHandler, true);
+// Parsed demos are served pre-compressed from the cache; this covers everything else (the old api had a [Compress] filter).
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
 
-                Console.Title = Config.DisplayName;
+builder.Services.AddHttpClient(DemoController.HttpClientName, client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(60);
+    client.MaxResponseContentBufferSize = DemoController.MaxDemoSize;
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("nfk-demoparser/2.0 (+https://github.com/NeedForKillTheGame/nfklib)");
+});
 
-                Log.Debug("Running in console mode");
-                service.Start();
+// Cache of parsed demos: memory (sized, short lived) + disk (sized), see appsettings.json / docker-compose.yml.
+builder.Services.Configure<DemoCacheOptions>(builder.Configuration.GetSection(DemoCacheOptions.SectionName));
+builder.Services.Configure<DemoSourceOptions>(builder.Configuration.GetSection(DemoSourceOptions.SectionName));
+var cacheOptions = builder.Configuration.GetSection(DemoCacheOptions.SectionName).Get<DemoCacheOptions>() ?? new DemoCacheOptions();
+builder.Services.AddMemoryCache(options =>
+{
+    if (cacheOptions.MemorySizeMB > 0)
+        options.SizeLimit = cacheOptions.MemorySizeMB * 1024L * 1024;
+});
+builder.Services.AddSingleton<DemoCache>();
 
-                Console.WriteLine("Press any key to stop the service...");
-                Console.Read();
+var app = builder.Build();
 
-                service.Stop();
-            }
-            // service mode
-            else
-            {
-                Log.Debug("Running in service mode");
-                ServiceBase.Run(servicesToRun);
-            }
-        }
+app.UseExceptionHandler();
+app.UseResponseCompression();
+app.UseCors();
 
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    // Relative path, so the UI also works behind a reverse proxy prefix (e.g. https://host/demoparser/).
+    options.SwaggerEndpoint("swagger/v1/swagger.json", "NFK Demo Parser");
+    options.RoutePrefix = string.Empty; // Swagger UI at the application root
+});
 
+app.MapControllers();
 
-
-        #region Page Event Setup
-        enum ConsoleCtrlHandlerCode : uint
-        {
-            CTRL_C_EVENT = 0,
-            CTRL_BREAK_EVENT = 1,
-            CTRL_CLOSE_EVENT = 2,
-            CTRL_LOGOFF_EVENT = 5,
-            CTRL_SHUTDOWN_EVENT = 6
-        }
-        delegate bool ConsoleCtrlHandlerDelegate(ConsoleCtrlHandlerCode eventCode);
-        [DllImport("kernel32.dll")]
-        static extern bool SetConsoleCtrlHandler(ConsoleCtrlHandlerDelegate handlerProc, bool add);
-        static ConsoleCtrlHandlerDelegate _consoleHandler;
-        #endregion
-
-        #region Page Events
-        static bool ConsoleEventHandler(ConsoleCtrlHandlerCode eventCode)
-        {
-            // Handle close event here...
-            switch (eventCode)
-            {
-                case ConsoleCtrlHandlerCode.CTRL_C_EVENT:
-                case ConsoleCtrlHandlerCode.CTRL_CLOSE_EVENT:
-                case ConsoleCtrlHandlerCode.CTRL_BREAK_EVENT:
-                case ConsoleCtrlHandlerCode.CTRL_LOGOFF_EVENT:
-                case ConsoleCtrlHandlerCode.CTRL_SHUTDOWN_EVENT:
-
-                    service.Stop();
-
-                    Environment.Exit(0);
-                    break;
-            }
-
-            return (false);
-        }
-        #endregion
-    }
-}
+app.Run();

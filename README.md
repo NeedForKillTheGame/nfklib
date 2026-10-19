@@ -79,7 +79,7 @@ demowebapi
 
 Можно установить как службу Windows с параметром командной строки `demowebapi.exe /install`, или удалить через `demowebapi.exe /uninstall`.
 
-Работает по адресу https://nfk.harpywar.com/demoparser
+Работает по адресу https://nfk.harpywar.com/demoparser/
 
 ------------------------------
 

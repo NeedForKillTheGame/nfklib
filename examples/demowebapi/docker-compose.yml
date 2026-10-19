@@ -1,0 +1,21 @@
+services:
+  demoparser:
+    build: .
+    image: harpywar/nfk-demoparser:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # parsed demos, gzip compressed JSON files; the least recently used are deleted above the limit
+      DemoCache__Directory: /app/cache
+      DemoCache__MaxDiskSizeMB: "1024"
+      # hot responses in memory (survives a browser reload), hh:mm:ss after the last use
+      DemoCache__MemorySizeMB: "32"
+      DemoCache__MemoryTtl: "00:05:00"
+      # restrict the "url" parameter to these hosts (any host when not set)
+      # DemoSource__AllowedHosts__0: stats.needforkill.ru
+    volumes:
+      - demo-cache:/app/cache
+
+volumes:
+  demo-cache:

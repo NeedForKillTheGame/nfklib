@@ -54,7 +54,24 @@ var nmap = new NFKMap();
 var map = nmap.Read();
 
 // извлечь картинку палитры
-map.Palette.Save("palette.png", ImageFormat.Png);
+map.Palette.SaveAsPng("palette.png"); // using SixLabors.ImageSharp;
+```
+
+Сборка и запуск (.NET 10)
+---
+Все проекты используют .NET 10 SDK и работают в Windows, Linux и macOS.
+
+```sh
+dotnet build nfklib.sln
+dotnet run --project examples/demostats -- demo.ndm
+dotnet run --project examples/demowebapi
+```
+
+Сборка Docker-образа из корня репозитория:
+
+```sh
+docker build -f examples/demowebapi/Dockerfile -t nfk-demoparser .
+docker compose -f examples/demowebapi/docker-compose.yml up --build
 ```
 
 demostats
@@ -77,7 +94,7 @@ demowebapi
 ---
 Дополнительная программа-пример, предоставляет REST WebAPI с единственным методом для загрузки демок, который возвращает статистику игроков и массив всех игровых действий в формате JSON.
 
-Можно установить как службу Windows с параметром командной строки `demowebapi.exe /install`, или удалить через `demowebapi.exe /uninstall`.
+Использует ASP.NET Core. Swagger UI доступен по корневому адресу приложения. Для запуска в контейнере используйте Docker Compose (команда выше).
 
 Работает по адресу https://nfk.harpywar.com/demoparser/
 

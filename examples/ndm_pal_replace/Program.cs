@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
+using SixLabors.ImageSharp;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -74,7 +74,9 @@ namespace ndm_pal_replace
                 else
                 {
                     Console.WriteLine("Reading palette " + palOrMapFile + "...");
-                    ndm.Map.map.Palette = new Bitmap(Bitmap.FromFile(palOrMapFile));
+                    var palette = Image.Load(palOrMapFile);
+                    ndm.Map.map.Palette?.Dispose();
+                    ndm.Map.map.Palette = palette;
                 }
 
                 if (args.Length >= 4)

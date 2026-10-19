@@ -1,6 +1,8 @@
 services:
   demoparser:
-    build: .
+    build:
+      context: ../..
+      dockerfile: examples/demowebapi/Dockerfile
     image: harpywar/nfk-demoparser:latest
     restart: unless-stopped
     ports:

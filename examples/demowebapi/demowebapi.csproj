@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\nfklib\nfklib.csproj" />
+    <ProjectReference Include="../../nfklib/nfklib.csproj" />
   </ItemGroup>
 
 </Project>

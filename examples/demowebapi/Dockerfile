@@ -2,15 +2,15 @@
 # e.g. linux/amd64 from an Apple Silicon Mac). The publish output is portable IL, only the
 # runtime stage below is platform specific.
 #
-#   docker buildx build --platform linux/amd64 -t harpywar/nfk-demoparser:latest --push .
+#   docker buildx build --platform linux/amd64 -t harpywar/nfk-demoparser:latest --push -f examples/demowebapi/Dockerfile .
 #
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS builder
 WORKDIR /app
 
 COPY . /app
 
-RUN dotnet restore
-RUN dotnet publish --no-restore -c release -o binaries demowebapi.csproj
+RUN dotnet restore examples/demowebapi/demowebapi.csproj
+RUN dotnet publish --no-restore -c release -o binaries examples/demowebapi/demowebapi.csproj
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
 WORKDIR /app

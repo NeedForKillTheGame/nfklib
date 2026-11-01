@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="SharpCompress" Version="1.0.0" />
     <!-- 3.1.12 is the last ImageSharp release that builds without a paid Six Labors license key (3.2+ / 4.x fail the build). -->
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.2.0" />
   </ItemGroup>
 
 </Project>
